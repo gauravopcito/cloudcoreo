@@ -118,6 +118,21 @@ variables:
         default: /data/db
         description: If you want the mongodb data dir to be something other than /data/db set it here
         required: true
+    DATABASE_NAME:
+        default: testdatabase
+        description: null
+        required: true
+        type: string
+    MASTER_USERNAME:
+        default: testuser
+        description: null
+        required: true
+        type: string
+    MASTER_PASSWORD:
+        default: testuser
+        description: null
+        required: true
+        type: string
     CLUSTER_TYPE:
         default: ['Single Node', 'Replica Set', 'Sharded Cluster']
         description: Cluster type
