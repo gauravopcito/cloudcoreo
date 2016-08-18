@@ -120,31 +120,16 @@ variables:
         required: true
     DATABASE_NAME:
         default: testdatabase
-        description: null
+        description: 
         required: false
         type: string
     MASTER_USERNAME:
         default: testuser
-        description: null
+        description: 
         required: false
         type: string
     MASTER_PASSWORD:
         default: testuser
-        description: null
+        description: 
         required: false
         type: string
-    CLUSTER_TYPE:
-        default: ["Single Node", "Replica Set", "Sharded Cluster"]
-        description: Cluster type
-        required: false
-        type: Array<String>
-    AVAILABILITY_ZONES:
-        default: availability_zones ["us-east-1b", "us-east-1c", "us-east-1d"]
-        description: Multiple availability zone
-        required: false
-        type: Array<String>
-    NO_OF_REPLICA_SET:
-        default: 1
-        description: Number of replica set
-        required: true
-        type: number
