@@ -130,7 +130,7 @@ coreo_aws_iam_instance_profile "${MONGO_NAME}" do
 end
 
 coreo_aws_ec2_instance "${MONGO_NAME}" do
-  action :sustain
+  action :define
   image_id "${MONGO_AMI}"
   size "${MONGO_SIZE}"
   security_groups ["${MONGO_SG_NAME}"]
