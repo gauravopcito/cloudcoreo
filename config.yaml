@@ -118,18 +118,3 @@ variables:
         default: /data/db
         description: If you want the mongodb data dir to be something other than /data/db set it here
         required: true
-    DATABASE_NAME:
-        default: testdatabase
-        description: 
-        required: false
-        type: string
-    MASTER_USERNAME:
-        default: testuser
-        description: 
-        required: false
-        type: string
-    MASTER_PASSWORD:
-        default: testuser
-        description: 
-        required: false
-        type: string
