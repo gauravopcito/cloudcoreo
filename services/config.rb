@@ -12,19 +12,28 @@
 ##
 
 coreo_aws_vpc_vpc "${VPC_NAME}" do
-  action :find
+  coreo_aws_vpc_vpc "${VPC_NAME}" do
+  action :find_or_create
   cidr "${VPC_OCTETS}/16"
+  internet_gateway true
 end
 
 coreo_aws_vpc_routetable "${PRIVATE_ROUTE_NAME}" do
-  action :find
+  action :sustain
   vpc "${VPC_NAME}"
+  routes [
+             { :from => "0.0.0.0/0", :to => "${VPC_NAME}", :type => :igw }
+        ]
+  number_of_tables 1
 end
 
 coreo_aws_vpc_subnet "${PRIVATE_SUBNET_NAME}" do
-  action :find
-  route_table "${PRIVATE_ROUTE_NAME}"
+  action :sustain
+  number_of_zones 3
+  percent_of_vpc_allocated 25
+  route_table "${PUBLIC_ROUTE_NAME}"
   vpc "${VPC_NAME}"
+  map_public_ip_on_launch true
 end
 
 coreo_aws_ec2_securityGroups "${MONGO_SG_NAME}" do
