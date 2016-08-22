@@ -3,6 +3,7 @@
 MONGO_DB_VERSION="${MONGO_DB_VERSION:-3.2.5}"
 MONGO_DATA_DIR="${MONGO_DATA_DIR:-}"
 
+echo "====================IN INSTALL MONGO SCRIPT=========================="
 yum install -y "mongodb-org-${MONGO_DB_VERSION}" "mongodb-org-server-${MONGO_DB_VERSION}" "mongodb-org-shell-${MONGO_DB_VERSION}" "mongodb-org-mongos-${MONGO_DB_VERSION}" "mongodb-org-tools-${MONGO_DB_VERSION}"
 
 ## don't upgrade mongo now that we have it installed
