@@ -116,9 +116,9 @@ variables:
         required: true
     AVAILABILITY_ZONES:
         default: 
-	    - us-west-1a
-	    - us-west-1b
-	    - us-west-1c
+	    - 'us-west-1a'
+	    - 'us-west-1b'
+	    - 'us-west-1c'
         description: Multiple availability zone
         required: false
-        type: Array
+        type: array
