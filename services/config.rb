@@ -150,6 +150,7 @@ coreo_aws_ec2_autoscaling "${MONGO_NAME}" do
   maximum ${MONGO_GROUP_SIZE_MAX}
   server_definition "${MONGO_NAME}"
   subnet "${PRIVATE_SUBNET_NAME}"
+  availability_zones 
   upgrade({
             :upgrade_on => "dirty",
             :cooldown => 10,
