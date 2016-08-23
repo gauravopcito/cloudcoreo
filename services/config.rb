@@ -138,10 +138,6 @@ coreo_aws_ec2_instance "${MONGO_NAME}" do
   role "${MONGO_NAME}"
   ssh_key "${MONGO_KEY}"
   upgrade_trigger "2"
-  environment_variables [
-                         "PRIVATE_IP_ADDRESS=STACK::coreo_aws_ec2_autoscaling.${MONGO_NAME}.private_ip_addresses",
-                         "INSTANCE_IDS=STACK::coreo_aws_ec2_autoscaling.${MONGO_NAME}.instance_ids",
-                        ]
 end
 
 coreo_aws_ec2_autoscaling "${MONGO_NAME}" do
@@ -155,11 +151,16 @@ coreo_aws_ec2_autoscaling "${MONGO_NAME}" do
             :cooldown => 10,
             :replace => 'in-place'
           })
+  environment_variables [
+                         "PRIVATE_IP_ADDRESS=STACK::coreo_aws_ec2_autoscaling.${MONGO_NAME}.private_ip_addresses",
+                         "INSTANCE_IDS=STACK::coreo_aws_ec2_autoscaling.${MONGO_NAME}.instance_ids",
+                        ]
 end
 
 coreo_aws_route53_record "${MONGO_NAME}.db" do
   action :sustain
   type "A"
   zone "${DNS_ZONE}"
+  values ["STACK::coreo_aws_ec2_autoscaling.${MONGO_NAME}.private_ip_addresses"]
 end
 
