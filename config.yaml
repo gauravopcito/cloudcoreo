@@ -120,5 +120,5 @@ variables:
 	    - 'us-west-1b'
 	    - 'us-west-1c'
         description: Multiple availability zone
-        required: false
-        type: array
+        required: true
+        type: Array
