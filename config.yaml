@@ -114,11 +114,3 @@ variables:
         default: /data/db
         description: If you want the mongodb data dir to be something other than /data/db set it here
         required: true
-    AVAILABILITY_ZONES:
-        default: 
-	    - us-west-1a
-	    - us-west-1b
-	    - us-west-1c
-        description: Multiple availability zone
-        required: true
-        type: Array
