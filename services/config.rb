@@ -140,7 +140,7 @@ coreo_aws_ec2_instance "${MONGO_NAME}" do
   upgrade_trigger "2"
   environment_variables [
                          "PRIVATE_IP_ADDRESS=STACK::coreo_aws_ec2_autoscaling.${MONGO_NAME}.private_ip_addresses",
-			 "PRIVATE_IP_ADDRESS=STACK::coreo_aws_ec2_autoscaling.${MONGO_NAME}.public_ip_addresses",
+			 "PUBLIC_IP_ADDRESS=STACK::coreo_aws_ec2_autoscaling.${MONGO_NAME}.public_ip_addresses",
                          "INSTANCE_IDS=STACK::coreo_aws_ec2_autoscaling.${MONGO_NAME}.instance_ids",
                         ]
 end
