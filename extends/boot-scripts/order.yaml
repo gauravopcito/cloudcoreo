@@ -1,0 +1,10 @@
+script-order:
+  - expand_root_fs.sh
+  - set_etc_hosts.sh
+  - set_timezone.sh
+  - install_cloudcoreo_repo.sh
+  - install_mlocate.sh
+  - install_emacs.sh
+  - install_screen.sh
+  - setup_python.sh
+  - install_datadog.sh
