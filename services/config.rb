@@ -158,9 +158,9 @@ coreo_aws_ec2_autoscaling "${MONGO_NAME}" do
           })
 end
 
-coreo_aws_route53_record "${MONGO_NAME}.db" do
+coreo_aws_route53_record "${MONGO_NAME}.db.opcito" do
   action :sustain
-  type "A"
+  type "CNAME"
   zone "${DNS_ZONE}"
   values ["STACK::coreo_aws_ec2_autoscaling.${MONGO_NAME}.private_ip_addresses"]
 end
