@@ -1,8 +1,4 @@
 variables:
-    DNS_ZONE:
-        default: hack.cloudcoreo.com
-        description: the dns entry for the zone (i.e. example.com)
-        required: false
     VPC_NAME:
         required: true
         description: the name of the VPC
@@ -86,6 +82,10 @@ variables:
         overrides: null
         required: true
         type: null
+    MONGO_DATA_DIR:
+        default: /data/db
+        description: If you want the mongodb data dir to be something other than /data/db set it here
+        required: true
     BACKUP_BUCKET_REGION:
         default: us-east-1
         description: the region where there vpn backups bucket was created
@@ -110,7 +110,13 @@ variables:
         description: the key pair to launch the mongo db with - this should exist in the clou already
         required: false
         type: string
-    MONGO_DATA_DIR:
-        default: /data/db
-        description: If you want the mongodb data dir to be something other than /data/db set it here
-        required: true
+    DNS_ZONE:
+        default: hack.cloudcoreo.com
+        description: the dns entry for the zone (i.e. example.com)
+        required: false
+    DATADOG_KEY:
+        default: null
+        value: null
+        description: "If you have a datadog key, enter it here and we will install the agent"
+        overrides: null
+        required: false
