@@ -32,7 +32,7 @@ variables:
         required: true
         type: Array
     BACKUP_BUCKET:
-        default: cloudcoreo-backups-a
+        default: cloudcoreo-backups-mongo
         description: what s3 bucket should we back up to?
         required: true
     MONGO_NAME:
