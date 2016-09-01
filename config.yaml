@@ -1,24 +1,28 @@
 variables:
-    VPC_NAME:
+    CLUSTER_AMI:
+        description: "the ami to launch for the cluster - default is Amazon Linux AMI 2015.03 (HVM), SSD Volume Type"
+        switch: "INSTANCE::region"
+        cases:
+            us-east-1: ami-1ecae776
+            us-west-1: ami-d114f295
+            us-west-2: ami-e7527ed7
+            eu-west-1: ami-a10897d6
+            eu-central-1: ami-a8221fb5
+            ap-southeast-1: ami-68d8e93a
+            ap-northeast-1: ami-cbf90ecb
+            ap-southeast-2: ami-fd9cecc7
+            sa-east-1: ami-b52890a8
+        type: case
         required: true
-        description: the name of the VPC
-        default: test-vpc
-    VPC_OCTETS:
-        required: true
-        description: the /16 net of the VPC to look for - i.e 123.123.0.0
-        default: 10.11.0.0
-    PRIVATE_ROUTE_NAME:
-        required: true
-        description: the name to give to the private route
-        default: test-private-route
-    PRIVATE_SUBNET_NAME:
-        required: true
-        description: the cloudcoreo name of the private vpc subnets
-        default: test-private-subnet
     MONGO_SG_NAME:
-        default: mongodb
+        default: op-mongodb
         required: true
         description: the name of the mongodb security group to create
+    VPC_NAME:
+        description: the cloudcoreo defined vpc to add this cluster to
+        type: String
+        required: true
+        default: op-vpc
     MONGO_INGRESS_CIDRS:
         default:
             - 10.0.0.0/8
@@ -32,11 +36,11 @@ variables:
         required: true
         type: Array
     BACKUP_BUCKET:
-        default: cloudcoreo-backups-mongo
+        default: cloudcoreo-opcito-buk
         description: what s3 bucket should we back up to?
         required: true
     MONGO_NAME:
-        default: mongodb
+        default: op-mongodb
         description: name this mongodb deployment
         required: true
     MONGO_SIZE:
@@ -46,13 +50,93 @@ variables:
     MONGO_GROUP_SIZE_MIN:
         required: true
         description: the miniumum number of mongo instances to launch
-        default: 1
+        default: 2
         type: number
     MONGO_GROUP_SIZE_MAX:
         required: true
         description: the maximum number of mongo instances to launch
-        default: 1
+        default: 2
         type: number
+    PRIVATE_SUBNET_NAME:
+        description: the private subnet in which the cluster should be added
+        type: String
+        required: true
+        default: op-private-subnet
+    DNS_ZONE:
+        description: the zone in which the internal elb dns entry should be maintained
+        type: String
+        required: true
+        default: cloudcoreo.opcito.com
+    VPC_CIDR:
+        description: the cloudcoreo defined vpc to add this cluster to
+        type: String
+        required: true
+        default: 10.113.0.0/16
+    PRIVATE_ROUTE_NAME:
+        description: the private subnet in which the cluster should be added
+        type: String
+        required: true
+        default: op-private-route
+    CLUSTER_NAME:
+        default: op-lc
+        description: the name of the cluster - this will become your dns record too
+        type: String
+        required: true
+    CLUSTER_ELB_TRAFFIC_PORTS:
+        default:
+            - 80
+        description: ports that need to allow traffic into the ELB
+        type: Array
+        required: true
+    CLUSTER_ELB_TRAFFIC_CIDRS:
+        default:
+            - 10.0.0.0/8
+        description: the cidrs to allow traffic from on the ELB itself
+        type: Array
+        required: true
+    CLUSTER_TCP_HEALTH_CHECK_PORT:
+        default: 27017
+        description: a tcp port the ELB will check every so often - this defines health and ASG termination
+        type: number
+        required: true
+    CLUSTER_INSTANCE_TRAFFIC_PORTS:
+        default:
+            - 22
+            - 27017
+            - 28017
+        description: "ports to allow traffic on directly to the instances. Note we'd like to have 27017..27030 for this - TODO"
+        type: Array
+        required: true
+    CLUSTER_INSTANCE_TRAFFIC_CIDRS:
+        default:
+            - 10.0.0.0/8
+        description: cidrs that are allowed to access the instances directly
+        type: Array
+        required: true
+    CLUSTER_SIZE:
+        default: t2.mocro
+        description: the image size to launch
+        required: true
+    CLUSTER_GROUP_SIZE_MIN:
+        default: 3
+        description: the minimum number of instances to launch
+        type: number
+        required: true
+    CLUSTER_GROUP_SIZE_MAX:
+        default: 5
+        description: the maxmium number of instances to launch
+        type: number
+        required: true
+    CLUSTER_HEALTH_CHECK_GRACE_PERIOD:
+        default: 600
+        description: the time in seconds to allow for instance to boot before checking health
+        type: number
+        required: true
+    CLUSTER_UPGRADE_COOLDOWN:
+        default: 300
+        description: the time in seconds between rolling instances during an upgrade
+        type: number
+        required: true
     TIMEZONE:
         default: America/Chicago
         value: America/Chicago
@@ -82,12 +166,8 @@ variables:
         overrides: null
         required: true
         type: null
-    MONGO_DATA_DIR:
-        default: /data/db
-        description: If you want the mongodb data dir to be something other than /data/db set it here
-        required: true
     BACKUP_BUCKET_REGION:
-        default: us-east-1
+        default: us-west-2
         description: the region where there vpn backups bucket was created
         overrides: null
         required: false
@@ -106,17 +186,42 @@ variables:
             sa-east-1: ami-b52890a8
         type: case
     MONGO_KEY:
-        default: macbook
+        default: george
         description: the key pair to launch the mongo db with - this should exist in the clou already
         required: false
         type: string
-    DNS_ZONE:
-        default: hack.cloudcoreo.com
-        description: the dns entry for the zone (i.e. example.com)
+    VPC_SEARCH_TAGS:
+        description: "if you have more than one VPC with the same CIDR, and it is not under CloudCoreo control, we need a way to find it. Enter some unique tags that exist on the VPC you want us to find. ['env=production','Name=prod-vpc']"
+        type: Array
         required: false
+    PRIVATE_ROUTE_SEARCH_TAGS:
+        description: "if you more than one route table or set of route tables, and it is not under CloudCoreo control, we need a way to find it. Enter some unique tags that exist on your route tables you want us to find. i.e. ['Name=my-private-routetable','env=dev']"
+        type: Array
+        required: false
+    PRIVATE_SUBNET_SEARCH_TAGS:
+        description: "Usually the private-routetable association is enough for us to find the subnets you need, but if you have more than one subnet, we may need a way to find them. unique tags is a great way. enter them there. i.e. ['Name=my-private-subnet']"
+        type: Array
+        required: false
+    ELB_LISTENERS:
+        default: "[\n  {\n    :elb_protocol => 'http', \n    :elb_port => 80,\n    :to_protocol => 'https', \n    :to_port => 8443\n  }\n]\n"
+        description: The listeners to apply to the ELB
+    CLUSTER_KEY:
+        description: the ssh key to associate with the instance(s) - blank will disable ssh
+        type: string
+        required: false
+        default: george
     DATADOG_KEY:
         default: null
         value: null
         description: "If you have a datadog key, enter it here and we will install the agent"
         overrides: null
+        required: false
+    WAIT_FOR_CLUSTER_MIN:
+        default: true
+        description: true if the cluster should wait for all instances to be in a running state
+        type: boolean
+        required: false
+    MONGO_DATA_DIR:
+        default: /data/db
+        description: If you want the mongodb data dir to be something other than /data/db set it here
         required: false
