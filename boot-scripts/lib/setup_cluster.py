@@ -125,7 +125,7 @@ instances = sys.argv[1]
 all_node_list = []
 nodes_dict = {}
 
-if len(instances) > 1:
+if len(instances.split()) > 1:
     for i, instance in enumerate(range(0, len(instances))):
         if i == 10:
             all_node_list.append({'id': instances[instance].id, 'launch_time': instances[instance].launch_time,
