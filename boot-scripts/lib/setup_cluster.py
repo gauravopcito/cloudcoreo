@@ -126,15 +126,15 @@ all_node_list = []
 nodes_dict = {}
 
 if len(instances.split()) > 1:
-    for i, instance in enumerate(range(0, len(instances))):
+    for i, instance in enumerate(instances):
                 if i == 10:
-            all_node_list.append({'private_ip_address': instance, "node_type": "Query", "is_master":"False"})
+            all_node_list.append({"private_ip_address": instance, "node_type": "Query", "is_master":"False"})
         if i >= 6:
-            all_node_list.append({'private_ip_address': instance, "node_type": "Config", "is_master":"False"})
+            all_node_list.append({"private_ip_address": instance, "node_type": "Config", "is_master":"False"})
         if i % 3 != 0:
-            all_node_list.append({'private_ip_address': instance, "node_type":"Secondary", "is_master":"False"})
+            all_node_list.append({"private_ip_address": instance, "node_type":"Secondary", "is_master":"False"})
         else:
-            all_node_list.append({'private_ip_address': instance, "node_type":"Primary", "is_master":"True"})
+            all_node_list.append({"private_ip_address": instance, "node_type":"Primary", "is_master":"True"})
         nodes_dict = all_node_list
 
         write_cluster_file(nodes_dict)
