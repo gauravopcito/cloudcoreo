@@ -127,22 +127,17 @@ nodes_dict = {}
 
 if len(instances.split()) > 1:
     for i, instance in enumerate(range(0, len(instances))):
-        if i == 10:
-            all_node_list.append({'id': instances[instance].id, 'launch_time': instances[instance].launch_time,
-                                    'private_ip_address': instances[instance].private_ip_address,"node_type": "Query"})
+                if i == 10:
+            all_node_list.append({'private_ip_address': instance, "node_type": "Query", "is_master":"False"})
         if i >= 6:
-            all_node_list.append({'id': instances[instance].id, 'launch_time': instances[instance].launch_time,
-                                    'private_ip_address': instances[instance].private_ip_address, "node_type": "Config"})
+            all_node_list.append({'private_ip_address': instance, "node_type": "Config", "is_master":"False"})
         if i % 3 != 0:
-            all_node_list.append({'id':instances[instance].id, 'launch_time':instances[instance].launch_time,
-                          'private_ip_address': instances[instance].private_ip_address, "node_type":"Secondary"})
+            all_node_list.append({'private_ip_address': instance, "node_type":"Secondary", "is_master":"False"})
         else:
-            all_node_list.append({'id': instances[instance].id, 'launch_time': instances[instance].launch_time,
-                          'private_ip_address': instances[instance].private_ip_address, "node_type":"Primary"})
+            all_node_list.append({'private_ip_address': instance, "node_type":"Primary", "is_master":"True"})
         nodes_dict = all_node_list
 
         write_cluster_file(nodes_dict)
-
         setup_cluster()
 else:
     configure_standalone_node()
