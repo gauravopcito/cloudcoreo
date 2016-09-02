@@ -8,3 +8,5 @@
 script-order:
   - add_mongo_repo.sh
   - install_mongo.sh
+  - setup_cluster_profile.sh
+  - setup_backups.sh
