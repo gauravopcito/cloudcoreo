@@ -1,3 +1,6 @@
 [submodule "extends"]
 	path = extends
 	url = git@github.com:CloudCoreo/servers-base.git
+[submodule "servers-base"]
+	path = servers-base
+	url = https://github.com/CloudCoreo/servers-base.git
