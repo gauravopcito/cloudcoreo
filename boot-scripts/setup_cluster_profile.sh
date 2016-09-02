@@ -30,4 +30,4 @@ if [ -n "${WAIT_FOR_CLUSTER_MIN:-}" ]; then
     done
 fi
 
-python "./lib/setup_node_data.py" "$addresses"
+python "./lib/setup_cluster.py" "$addresses"
