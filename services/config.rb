@@ -13,45 +13,99 @@
 
 coreo_aws_vpc_vpc "${VPC_NAME}" do
   action :find
-  cidr "${VPC_OCTETS}/16"
+  cidr "${VPC_CIDR}"
+  tags ${VPC_SEARCH_TAGS}
 end
 
 coreo_aws_vpc_routetable "${PRIVATE_ROUTE_NAME}" do
   action :find
   vpc "${VPC_NAME}"
+  tags ${PRIVATE_ROUTE_SEARCH_TAGS}
 end
 
 coreo_aws_vpc_subnet "${PRIVATE_SUBNET_NAME}" do
   action :find
   route_table "${PRIVATE_ROUTE_NAME}"
   vpc "${VPC_NAME}"
+  tags ${PRIVATE_SUBNET_SEARCH_TAGS}
 end
 
-coreo_aws_ec2_securityGroups "${MONGO_SG_NAME}" do
+coreo_aws_ec2_securityGroups "${CLUSTER_NAME}-elb" do
   action :sustain
-  description "MongoDB security group"
+  description "load balance the ui and client connectinos"
   vpc "${VPC_NAME}"
   allows [ 
           { 
             :direction => :ingress,
             :protocol => :tcp,
-            :ports => ["27017..27030"],
-            :cidrs => ${MONGO_INGRESS_CIDRS}
-          },{ 
+            :ports => ${CLUSTER_ELB_TRAFFIC_PORTS},
+            :cidrs => ${CLUSTER_ELB_TRAFFIC_CIDRS}
+          },
+          { 
+            :direction => :egress,
+            :protocol => :tcp,
+            :ports => ["0..65535"],
+            :cidrs => ["0.0.0.0/0"]
+          }
+    ]
+end
+
+coreo_aws_ec2_elb "${CLUSTER_NAME}-elb" do
+  action :sustain
+  type "internal"
+  vpc "${VPC_NAME}"
+  subnet "${PRIVATE_SUBNET_NAME}"
+  security_groups ["${CLUSTER_NAME}-elb"]
+  listeners ${ELB_LISTENERS}
+  health_check_protocol 'tcp'
+  health_check_port "${CLUSTER_TCP_HEALTH_CHECK_PORT}"
+  health_check_timeout 5
+  health_check_interval 120
+  health_check_unhealthy_threshold 5
+  health_check_healthy_threshold 2
+end
+
+coreo_aws_route53_record "${CLUSTER_NAME}" do
+  action :sustain
+  type "CNAME"
+  zone "${DNS_ZONE}"
+  values ["STACK::coreo_aws_ec2_elb.${CLUSTER_NAME}-elb.dns_name"]
+end
+
+coreo_aws_ec2_securityGroups "${CLUSTER_NAME}" do
+  action :sustain
+  description "cluster instances security group"
+  vpc "${VPC_NAME}"
+  allows [
+          { 
             :direction => :ingress,
             :protocol => :tcp,
-            :ports => [22, 28017],
-            :cidrs => ${MONGO_INGRESS_CIDRS}
-          },{ 
-            :direction => :egress,
+            :ports => ${CLUSTER_INSTANCE_TRAFFIC_PORTS},
+            :cidrs => ${CLUSTER_INSTANCE_TRAFFIC_CIDRS}
+          },
+          { 
+            :direction => :ingress,
+            :protocol => :udp,
+            :ports => ${CLUSTER_INSTANCE_TRAFFIC_PORTS},
+            :cidrs => ${CLUSTER_INSTANCE_TRAFFIC_CIDRS}
+          },
+          { 
+            :direction => :ingress,
             :protocol => :tcp,
-            :ports => ["0..65535"],
-            :cidrs => ${MONGO_EGRESS_CIDRS}
-          },{ 
+            :ports => ${CLUSTER_INSTANCE_TRAFFIC_PORTS},
+            :groups => ["${CLUSTER_NAME}-elb"]
+          },
+          { 
             :direction => :egress,
             :protocol => :udp,
-            :ports => ["0..65535"],
-            :cidrs => ${MONGO_EGRESS_CIDRS}
+            :ports => ['0..65535'],
+            :cidrs => ['0.0.0.0/0']
+          },
+          { 
+            :direction => :egress,
+            :protocol => :tcp,
+            :ports => ['0..65535'],
+            :cidrs => ['0.0.0.0/0']
           }
     ]
 end
@@ -124,44 +178,56 @@ coreo_aws_iam_policy "${MONGO_NAME}-backup" do
 EOH
 end
 
-coreo_aws_iam_instance_profile "${MONGO_NAME}" do
+coreo_aws_iam_policy "${CLUSTER_NAME}" do
   action :sustain
-  policies ["${MONGO_NAME}-backup"]
+  policy_name "${CLUSTER_NAME}ServerIAMPolicy"
+  policy_document <<-EOH
+{
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Resource": [
+          "*"
+      ],
+      "Action": [ 
+          "autoscaling:DescribeAutoScalingGroups",
+          "autoscaling:DescribeAutoScalingInstances",
+          "ec2:DescribeAvailabilityZones",
+          "ec2:DescribeInstanceAttribute",
+          "ec2:DescribeInstanceStatus",
+          "ec2:DescribeInstances",
+          "ec2:DescribeTags"
+      ]
+    }
+  ]
+}
+EOH
 end
 
-coreo_aws_ec2_instance "${MONGO_NAME}" do
+coreo_aws_iam_instance_profile "${CLUSTER_NAME}" do
+  action :sustain
+  policies ["${CLUSTER_NAME}"]
+end
+
+coreo_aws_ec2_instance "${CLUSTER_NAME}" do
   action :define
-  image_id "${MONGO_AMI}"
-  size "${MONGO_SIZE}"
-  security_groups ["${MONGO_SG_NAME}"]
-  associate_public_ip false
-  role "${MONGO_NAME}"
-  ssh_key "${MONGO_KEY}"
-  upgrade_trigger "2"
-  environment_variables [
-                         "PRIVATE_IP_ADDRESS=STACK::coreo_aws_ec2_autoscaling.${MONGO_NAME}.private_ip_addresses",
-			 "PUBLIC_IP_ADDRESS=STACK::coreo_aws_ec2_autoscaling.${MONGO_NAME}.public_ip_addresses",
-                         "INSTANCE_IDS=STACK::coreo_aws_ec2_autoscaling.${MONGO_NAME}.instance_ids",
-                        ]
+  image_id "${CLUSTER_AMI}"
+  size "${CLUSTER_SIZE}"
+  security_groups ["${CLUSTER_NAME}"]
+  role "${CLUSTER_NAME}"
+  ssh_key "${CLUSTER_KEY}"
 end
 
-coreo_aws_ec2_autoscaling "${MONGO_NAME}" do
+coreo_aws_ec2_autoscaling "${CLUSTER_NAME}" do
   action :sustain 
-  minimum ${MONGO_GROUP_SIZE_MIN}
-  maximum ${MONGO_GROUP_SIZE_MAX}
-  server_definition "${MONGO_NAME}"
+  minimum ${CLUSTER_GROUP_SIZE_MIN}
+  maximum ${CLUSTER_GROUP_SIZE_MAX}
+  server_definition "${CLUSTER_NAME}"
   subnet "${PRIVATE_SUBNET_NAME}"
+  elbs ["${CLUSTER_NAME}-elb"]
+  health_check_grace_period ${CLUSTER_HEALTH_CHECK_GRACE_PERIOD}
   upgrade({
             :upgrade_on => "dirty",
-            :cooldown => 10,
-            :replace => 'in-place'
-          })
+            :cooldown => ${CLUSTER_UPGRADE_COOLDOWN}
+        })
 end
-
-coreo_aws_route53_record "${MONGO_NAME}.db.opcito" do
-  action :sustain
-  type "A"
-  zone "${DNS_ZONE}"
-  values ["STACK::coreo_aws_ec2_autoscaling.${MONGO_NAME}.private_ip_addresses"]
-end
-
