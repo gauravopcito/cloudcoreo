@@ -225,4 +225,9 @@ coreo_aws_ec2_autoscaling "${CLUSTER_NAME}" do
   server_definition "${CLUSTER_NAME}"
   subnet "${PRIVATE_SUBNET_NAME}"
   elbs ["${CLUSTER_NAME}-elb"]
+  health_check_grace_period ${CLUSTER_HEALTH_CHECK_GRACE_PERIOD}
+  upgrade({
+            :upgrade_on => "dirty",
+            :cooldown => ${CLUSTER_UPGRADE_COOLDOWN}
+        })
 end

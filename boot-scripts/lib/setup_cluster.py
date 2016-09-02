@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from subprocess import call, check_output, Popen
 import yaml
 import sys
