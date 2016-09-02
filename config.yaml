@@ -97,6 +97,13 @@ variables:
         description: the maxmium number of instances to launch
         type: number
         required: true
+    TIMEZONE:
+        default: America/Chicago
+        value: America/Chicago
+        description: the timezone the servers should come up in
+        overrides: null
+        required: true
+        type: null
     CLUSTER_HEALTH_CHECK_GRACE_PERIOD:
         default: 1000
         description: the time in seconds to allow for instance to boot before checking health
@@ -107,13 +114,6 @@ variables:
         description: the time in seconds between rolling instances during an upgrade
         type: number
         required: true
-    TIMEZONE:
-        default: America/Chicago
-        value: America/Chicago
-        description: the timezone the servers should come up in
-        overrides: null
-        required: true
-        type: null
     MONGO_SG_NAME:
         default: op-mongodb
         required: true
