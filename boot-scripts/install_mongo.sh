@@ -14,9 +14,9 @@ fi
 ## mongodb mounts in /data/db by default - if we want it somewhere else we keep that dir for simplicity and ln -sf it to the new path
 if [ -z "$MONGO_DATA_DIR" ]; then
     rm -rf /data/db
-    mkdir -p "${MONGO_DATA_DIR}"
+    mkdir -p "${MONGO_DATA_DIR}/db"
     # link the new dir
-    ln -sf "${MONGO_DATA_DIR}" /opt/mongodb
+    ln -sf "${MONGO_DATA_DIR}/db" /data/
 fi
 
 perl -i -pe 's{(^\s*bindIp:)}{#\1}g' /etc/mongod.conf

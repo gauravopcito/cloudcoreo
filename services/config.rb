@@ -216,6 +216,12 @@ coreo_aws_ec2_instance "${CLUSTER_NAME}" do
   security_groups ["${CLUSTER_NAME}"]
   role "${CLUSTER_NAME}"
   ssh_key "${CLUSTER_KEY}"
+  disks [
+         {
+           :device_name => "/dev/xvda",
+           :volume_size => 50
+         }
+        ]
 end
 
 coreo_aws_ec2_autoscaling "${CLUSTER_NAME}" do
