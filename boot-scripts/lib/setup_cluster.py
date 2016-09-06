@@ -61,6 +61,7 @@ def configure_standalone_node():
     configures the standalone node
     :return:
     '''
+    call("mkdir " + MONGO_DATA_DIR + "  -p ", shell=True)
     command = AGENT_INSTALL_LOCATION + " --port " + MONGODB_PORT + " --dbpath " + MONGO_DATA_DIR +\
           " < /dev/null > /dev/null 2>&1&  "
     call(command, shell=True)
@@ -81,6 +82,7 @@ def configure_replica_set():
     '''
     node_list = prepare_replica_nodes_list()
 
+    call("mkdir " + MONGO_DATA_DIR + "  -p ", shell=True)
     command = AGENT_INSTALL_LOCATION + " --replSet " + node_list[0] + " --port " + MONGODB_PORT \
               + " --logpath " + MONGO_DB_CONFIG_LOG_PATH + " --dbpath " + MONGO_DATA_DIR \
               + " --rest < /dev/null > /dev/null 2>&1&  "
