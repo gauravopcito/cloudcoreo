@@ -4,6 +4,7 @@ from subprocess import call, Popen, PIPE
 import yaml
 import sys
 import pymongo
+import time
 
 MONGO_DATA_DIR = "/data/db/"
 AGENT_INSTALL_LOCATION = "/usr/bin/mongod"
@@ -61,6 +62,7 @@ def configure_standalone_node():
     configures the standalone node
     :return:
     '''
+    call("service mongod stop", shell=True)
     call("mkdir " + MONGO_DATA_DIR + "  -p ", shell=True)
     command = AGENT_INSTALL_LOCATION + " --port " + MONGODB_PORT + " --dbpath " + MONGO_DATA_DIR +\
           " < /dev/null > /dev/null 2>&1&  "
@@ -82,6 +84,7 @@ def configure_replica_set():
     '''
     node_list = prepare_replica_nodes_list()
 
+    call("service mongod stop", shell=True)
     call("mkdir " + MONGO_DATA_DIR + "  -p ", shell=True)
     command = AGENT_INSTALL_LOCATION + " --replSet " + node_list[0] + " --port " + MONGODB_PORT \
               + " --logpath " + MONGO_DB_CONFIG_LOG_PATH + " --dbpath " + MONGO_DATA_DIR \
@@ -98,7 +101,23 @@ def configure_replica_set():
         conf = {'_id': node_list[0],
                      'members': [{'_id': 0, 'host': node_list[1][1]["private_ip"]}, {'_id': 1, 'host': node_list[1][2]["private_ip"]}]}
         db = connection.get_database("admin")
-        db.command('replSetInitiate', conf)
+
+        retry = 1
+        max_try = 10
+        while retry <= max_try:
+            is_retry_required = False
+            try:
+                db.command('replSetInitiate', conf)
+                break
+            except Exception as e:
+                is_retry_required = True
+            if is_retry_required:
+                print "rs.initiate() failed. Waiting for cluster configuration. Retrying in some time..."
+            retry += 1
+            time.sleep(60)
+            print "retrying mongo db configuration."
+            if retry == max_try:
+                print "Failed to configure replica set."
 
 
 def prepare_replica_nodes_list():
