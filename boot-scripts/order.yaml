@@ -7,6 +7,7 @@
 
 script-order:
   - add_mongo_repo.sh
+  - install_pymongo.sh
   - install_mongo.sh
   - start_mongodb.sh
   - setup_cluster_profile.sh
