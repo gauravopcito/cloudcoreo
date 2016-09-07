@@ -99,7 +99,7 @@ def configure_replica_set():
     if is_master:
         connection = pymongo.MongoClient()
         conf = {'_id': node_list[0],
-                     'members': [{'_id': 1, 'host': node_list[1][1]["private_ip"] + ":27017"}, {'_id': 2, 'host': node_list[1][2]["private_ip"] + ":27017"}]}
+                     'members': [{'_id': 0, 'host': node_list[1][0]["private_ip"] + ":27017"}, {'_id': 1, 'host': node_list[1][1]["private_ip"] + ":27017"}, {'_id': 2, 'host': node_list[1][2]["private_ip"] + ":27017"}]}
         db = connection.get_database("admin")
 
         retry = 1
@@ -150,7 +150,7 @@ if len(instances) > 1:
             all_node_list.append({'private_ip': instance, "node_type": "secondary", "is_master": False})
         else:
             all_node_list.append({'private_ip': instance, "node_type": "primary", "is_master": True})
-    nodes_dict = dict(replica_1=all_node_list)
+    nodes_dict = dict(rs0=all_node_list)
 
     write_cluster_file(nodes_dict)
     setup_cluster()
