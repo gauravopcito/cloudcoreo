@@ -192,7 +192,7 @@ variables:
         description: the ssh key to associate with the instance(s) - blank will disable ssh
         type: string
         required: false
-        default: george
+        default: mongodbcluster
     DATADOG_KEY:
         default: null
         value: null
@@ -214,7 +214,7 @@ variables:
             sa-east-1: ami-b52890a8
         type: case
     MONGO_KEY:
-        default: george
+        default: mongodbcluster
         description: the key pair to launch the mongo db with - this should exist in the clou already
         required: false
         type: string
