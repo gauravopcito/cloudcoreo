@@ -99,7 +99,7 @@ def configure_replica_set():
     if is_master:
         connection = pymongo.MongoClient()
         conf = {'_id': node_list[0],
-                     'members': [{'_id': 0, 'host': node_list[1][1]["private_ip"]}, {'_id': 1, 'host': node_list[1][2]["private_ip"]}]}
+                     'members': [{'_id': 1, 'host': node_list[1][1]["private_ip"] + ":27017"}, {'_id': 2, 'host': node_list[1][2]["private_ip"] + ":27017"}]}
         db = connection.get_database("admin")
 
         retry = 1
