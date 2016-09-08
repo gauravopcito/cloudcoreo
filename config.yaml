@@ -90,12 +90,12 @@ variables:
         description: the image size to launch
         required: true
     CLUSTER_GROUP_SIZE_MIN:
-        default: 1
+        default: 3
         description: the minimum number of instances to launch
         type: number
         required: true
     CLUSTER_GROUP_SIZE_MAX:
-        default: 2
+        default: 5
         description: the maxmium number of instances to launch
         type: number
         required: true
@@ -227,3 +227,23 @@ variables:
         default: /data/db
         description: If you want the mongodb data dir to be something other than /data/db set it here
         required: false
+    DATABASE_NAME:
+        default: cloudcoreodb
+        description: Database name to create
+        required: false
+        type: string
+    COLLECTION_NAME:
+        default: cloudcoreocoll
+        description: Collection name to create
+        required: false
+        type: string
+    MASTER_USER:
+        default: cloudcoreouser
+        description: Master user name
+        required: false
+        type: string
+    MASTER_PASSWORD:
+        default: cloudcoreopass
+        description: Master password
+        required: false
+        type: string
