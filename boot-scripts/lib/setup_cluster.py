@@ -137,6 +137,7 @@ def add_collection(node_list):
     try:
          call("/usr/bin/mongo " + node_list[1][0]["private_ip"] + ":" + MONGODB_PORT + "/" + "cloudcoreodb" + " --eval 'printjson(db.createCollection(\""
              + "cloudcoreocoll" + "\"))'", shell=True)
+         print "Collection get created successfully."
     except Exception as e:
         print "Collection not get added."
 
@@ -149,6 +150,7 @@ def add_database_user(node_list):
     try:
         call("/usr/bin/mongo " + node_list[1][0]["private_ip"] + ":" + MONGODB_PORT + "/" + "cloudcoreodb" + " --eval 'db.createUser( { user: \""
              + "cloudcoreouser" + "\", pwd: \"" + "cloudcoreopass" + "\", roles: [ \"readWrite\" ] } )'", shell=True)
+        print "User get created successfully."
     except Exception as e:
         print "User not get added."
 
