@@ -137,6 +137,7 @@ def add_collection(node_list):
     '''
     try:
          connection = pymongo.MongoClient()
+         db = connection.get_database("admin")
          db = connection.get_database("cloudcoreodb", read_preference=ReadPreference.PRIMARY)
          db.create_collection("cloudcoreocoll")
          print "Collection get created successfully."
