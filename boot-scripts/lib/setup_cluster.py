@@ -62,12 +62,14 @@ def configure_standalone_node():
     configures the standalone node
     :return:
     '''
+    print "MongoDB standalone node configuration started..."
     call("service mongod stop", shell=True)
     call("mkdir " + MONGO_DATA_DIR + "  -p ", shell=True)
     command = AGENT_INSTALL_LOCATION + " --port " + MONGODB_PORT + " --dbpath " + MONGO_DATA_DIR +\
           " < /dev/null > /dev/null 2>&1&  "
     call(command, shell=True)
     call("echo \"" + command + "&\" >> /etc/rc.local", shell=True)
+    print "MongoDB standalone node configuration Completed..."
 
 
 def setup_cluster():
@@ -107,18 +109,46 @@ def configure_replica_set():
         while retry <= max_try:
             is_retry_required = False
             try:
-                db.command('replSetInitiate', conf)
+                db.command('replSetInitiate', conf, check=True)
+                print "Replica configured successfully."
                 break
             except Exception as e:
                 is_retry_required = True
-            if is_retry_required:
-                print "rs.initiate() failed. Waiting for cluster configuration. Retrying in some time..."
-            retry += 1
-            time.sleep(60)
-            print "retrying mongo db configuration."
-            if retry == max_try:
-                print "Failed to configure replica set."
+                if is_retry_required:
+                    print "rs.initiate() failed. Waiting for cluster configuration. Retrying in some time..."
+                retry += 1
+                time.sleep(60)
+                print "retrying mongo db configuration."
+                if retry == max_try:
+                    print "Failed to configure replica set."
 
+        add_collection()
+
+        add_database_user()
+
+
+def add_collection():
+    '''
+    add collection
+    :return:
+    '''
+    try:
+         call("/usr/bin/mongo " + "hostname" + ":" + MONGODB_PORT + "/" + "testdb" + " --eval 'printjson(db.createCollection(\""
+             + "testuser" + "\"))'", shell=True)
+    except Exception as e:
+        print "Collection not get added."
+
+
+def add_database_user():
+    '''
+    add database user
+    :return:
+    '''
+    try:
+        call("/usr/bin/mongo " + "hostname" + ":" + MONGODB_PORT + "/" + "testdb" + " --eval 'db.addUser( { user: \""
+             + "testuser" + "\", pwd: \"" + "testuser" + "\", roles: [ \"readWrite\" ] } )'", shell=True)
+    except Exception as e:
+        print "User not get added."
 
 def prepare_replica_nodes_list():
     '''
