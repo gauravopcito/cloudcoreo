@@ -125,12 +125,12 @@ def configure_replica_set():
                 if retry == max_try:
                     print "Failed to configure replica set."
 
-        #add_collection(node_list)
+        add_collection()
 
-        #add_database_user(node_list)
+        add_database_user()
 
 
-def add_collection(node_list):
+def add_collection():
     '''
     add collection
     :return:
