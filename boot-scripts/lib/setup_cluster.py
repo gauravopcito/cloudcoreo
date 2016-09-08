@@ -140,7 +140,7 @@ def add_collection(node_list):
          db.create_collection("cloudcoreocoll")
          print "Collection get created successfully."
     except Exception as e:
-        print "Collection not get added."
+        print "Collection not get added. ==>>" + e.message
 
 
 def add_database_user(node_list):
@@ -154,7 +154,7 @@ def add_database_user(node_list):
         db.add_user("cloudcoreouser", "cloudcoreopass", roles=[{ "role" : "readWrite", "db" : "cloudcoreodb"}])
         print "User get created successfully."
     except Exception as e:
-        print "User not get added."
+        print "User not get added. ==>>" + e.message
 
 def prepare_replica_nodes_list():
     '''
