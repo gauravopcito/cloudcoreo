@@ -137,8 +137,8 @@ def add_collection(node_list):
     '''
     try:
          connection = pymongo.MongoClient()
-         db = connection.get_database("admin")
-         db = connection.get_database("cloudcoreodb", read_preference=ReadPreference.PRIMARY)
+         database.Database(connection, "cloudcoreodb")
+         db = connection.get_database("cloudcoreodb")
          db.create_collection("cloudcoreocoll")
          print "Collection get created successfully."
     except Exception as e:
@@ -152,7 +152,7 @@ def add_database_user(node_list):
     '''
     try:
         connection = pymongo.MongoClient()
-        db = connection.get_database("cloudcoreodb", read_preference=ReadPreference.PRIMARY)
+        db = connection.get_database("cloudcoreodb")
         db.add_user("cloudcoreouser", "cloudcoreopass", roles=[{ "role" : "readWrite", "db" : "cloudcoreodb"}])
         print "User get created successfully."
     except Exception as e:
