@@ -5,6 +5,7 @@ import yaml
 import sys
 import pymongo
 import time
+import logging
 
 MONGO_DATA_DIR = "/data/db/"
 AGENT_INSTALL_LOCATION = "/usr/bin/mongod"
@@ -62,14 +63,14 @@ def configure_standalone_node():
     configures the standalone node
     :return:
     '''
-    print "MongoDB standalone node configuration started..."
+    logging.info("MongoDB standalone node configuration started...")
     call("service mongod stop", shell=True)
     call("mkdir " + MONGO_DATA_DIR + "  -p ", shell=True)
     command = AGENT_INSTALL_LOCATION + " --port " + MONGODB_PORT + " --dbpath " + MONGO_DATA_DIR +\
           " < /dev/null > /dev/null 2>&1&  "
     call(command, shell=True)
     call("echo \"" + command + "&\" >> /etc/rc.local", shell=True)
-    print "MongoDB standalone node configuration Completed."
+    logging.debug("MongoDB standalone node configuration Completed.")
 
 
 def setup_cluster():
@@ -86,7 +87,7 @@ def configure_replica_set():
     '''
     node_list = prepare_replica_nodes_list()
 
-    print "Configure replica set of MongoDB started..."
+    logging.debug("Configure replica set of MongoDB started...")
     call("service mongod stop", shell=True)
     call("mkdir " + MONGO_DATA_DIR + "  -p ", shell=True)
     command = AGENT_INSTALL_LOCATION + " --replSet " + node_list[0] + " --port " + MONGODB_PORT \
@@ -100,7 +101,6 @@ def configure_replica_set():
 
     # if this is a master instance update node configuration
     if is_master:
-        print "Master node configuration started..."
         connection = pymongo.MongoClient()
         conf = {'_id': node_list[0],
                      'members': [{'_id': 0, 'host': node_list[1][0]["private_ip"] + ":27017"}, {'_id': 1, 'host': node_list[1][1]["private_ip"] + ":27017"}, {'_id': 2, 'host': node_list[1][2]["private_ip"] + ":27017"}]}
@@ -112,18 +112,18 @@ def configure_replica_set():
             is_retry_required = False
             try:
                 db.command('replSetInitiate', conf, check=True)
-		print "Master node configuration completed successfully."
-                print "Replica configured successfully."
+                logging.debug("Master node configuration completed successfully.")
+                logging.debug("Replica configured successfully.")
                 break
             except Exception as e:
                 is_retry_required = True
                 if is_retry_required:
-                    print "rs.initiate() failed. Waiting for cluster configuration. Retrying in some time..."
+                    logging.error("rs.initiate() failed. Waiting for cluster configuration. Retrying in some time...")
                 retry += 1
                 time.sleep(60)
-                print "Retrying mongo db configuration."
+                logging.debug("retrying mongo db configuration.")
                 if retry == max_try:
-                    print "Failed to configure replica set."
+                    logging.error("Failed to configure replica set.")
 
         add_collection()
 
@@ -139,7 +139,7 @@ def add_collection():
          call("/usr/bin/mongo " + "hostname" + ":" + MONGODB_PORT + "/" + "testdb" + " --eval 'printjson(db.createCollection(\""
              + "testuser" + "\"))'", shell=True)
     except Exception as e:
-        print "Collection not get added."
+        logging.error("Collection not get added.")
 
 
 def add_database_user():
@@ -151,7 +151,7 @@ def add_database_user():
         call("/usr/bin/mongo " + "hostname" + ":" + MONGODB_PORT + "/" + "testdb" + " --eval 'db.addUser( { user: \""
              + "testuser" + "\", pwd: \"" + "testuser" + "\", roles: [ \"readWrite\" ] } )'", shell=True)
     except Exception as e:
-        print "User not get added."
+        logging.error("User not get added.")
 
 def prepare_replica_nodes_list():
     '''
