@@ -5,7 +5,7 @@ import yaml
 import sys
 import pymongo
 import time
-from pymongo import ReadPreference
+from pymongo import ReadPreference, collection, database
 
 MONGO_DATA_DIR = "/data/db/"
 AGENT_INSTALL_LOCATION = "/usr/bin/mongod"
@@ -108,7 +108,7 @@ def configure_replica_set():
 
         retry = 1
         max_try = 10
-        while retry <= max_try:
+        while retry < max_try:
             is_retry_required = False
             try:
                 db.command('replSetInitiate', conf, check=True)
@@ -145,7 +145,7 @@ def add_collection():
         print "Collection not get added. ==>>" + e.message
 
 
-def add_database_user(node_list):
+def add_database_user():
     '''
     add database user
     :return:
