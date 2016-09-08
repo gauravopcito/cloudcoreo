@@ -112,7 +112,7 @@ def configure_replica_set():
             is_retry_required = False
             try:
                 db.command('replSetInitiate', conf, check=True)
-		print "Master node configuration completed"
+		print "Master node configuration completed successfully."
                 print "Replica configured successfully."
                 break
             except Exception as e:
