@@ -69,7 +69,7 @@ def configure_standalone_node():
           " < /dev/null > /dev/null 2>&1&  "
     call(command, shell=True)
     call("echo \"" + command + "&\" >> /etc/rc.local", shell=True)
-    print "MongoDB standalone node configuration Completed..."
+    print "MongoDB standalone node configuration Completed."
 
 
 def setup_cluster():
@@ -86,6 +86,7 @@ def configure_replica_set():
     '''
     node_list = prepare_replica_nodes_list()
 
+    print "Configure replica set of MongoDB started..."
     call("service mongod stop", shell=True)
     call("mkdir " + MONGO_DATA_DIR + "  -p ", shell=True)
     command = AGENT_INSTALL_LOCATION + " --replSet " + node_list[0] + " --port " + MONGODB_PORT \
@@ -99,6 +100,7 @@ def configure_replica_set():
 
     # if this is a master instance update node configuration
     if is_master:
+        print "Master node configuration started..."
         connection = pymongo.MongoClient()
         conf = {'_id': node_list[0],
                      'members': [{'_id': 0, 'host': node_list[1][0]["private_ip"] + ":27017"}, {'_id': 1, 'host': node_list[1][1]["private_ip"] + ":27017"}, {'_id': 2, 'host': node_list[1][2]["private_ip"] + ":27017"}]}
@@ -110,6 +112,7 @@ def configure_replica_set():
             is_retry_required = False
             try:
                 db.command('replSetInitiate', conf, check=True)
+		print "Master node configuration completed"
                 print "Replica configured successfully."
                 break
             except Exception as e:
@@ -118,7 +121,7 @@ def configure_replica_set():
                     print "rs.initiate() failed. Waiting for cluster configuration. Retrying in some time..."
                 retry += 1
                 time.sleep(60)
-                print "retrying mongo db configuration."
+                print "Retrying mongo db configuration."
                 if retry == max_try:
                     print "Failed to configure replica set."
 
@@ -185,4 +188,8 @@ if len(instances) > 1:
     write_cluster_file(nodes_dict)
     setup_cluster()
 else:
+    for index, instance in enumerate(instances):
+        all_node_list.append({'private_ip': instance, "node_type": "standalone", "is_master": False})
+    nodes_dict = dict(standalone=all_node_list)
+    write_cluster_file(nodes_dict)
     configure_standalone_node()
