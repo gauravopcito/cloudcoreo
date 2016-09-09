@@ -5,7 +5,7 @@ import yaml
 import sys
 import pymongo
 import time
-from pymongo import ReadPreference, collection, database
+from pymongo import ReadPreference, collection, database, Connection
 import os
 
 MONGO_DATA_DIR = "/data/db/"
@@ -137,8 +137,11 @@ def add_collection():
     :return:
     '''
     try:
-         call("/usr/bin/mongo " + node_list[1][0]["private_ip"] + ":" + MONGODB_PORT + "/" + os.environ.get("DATABASE_NAME")
-              + " --eval 'printjson(db.createCollection(\"" - + os.environ.get("COLLECTION_NAME") + "\"))'", shell=True)
+         #call("/usr/bin/mongo " + node_list[1][0]["private_ip"] + ":" + MONGODB_PORT + "/" + os.environ.get#("DATABASE_NAME")
+              #+ " --eval 'printjson(db.createCollection(\"" - + os.environ.get("COLLECTION_NAME") + #"\"))'", shell=True)
+         connection = Connection()
+         db = connection[os.environ.get("DATABASE_NAME")]
+         collection = db[os.environ.get("COLLECTION_NAME")]
          print "Collection get created successfully."
     except Exception as e:
         print "Collection not get added. ==>>" + e.message
