@@ -137,7 +137,7 @@ def add_collection():
     :return:
     '''
     try:
-	 print "=============="+os.environ("DATABASE_NAME")+"================"
+	 print "=============="+os.environ.get("DATABASE_NAME")+"================"
          connection = pymongo.MongoClient()
          database.Database(connection, "cloudcoreodb")
          db = connection.get_database("cloudcoreodb")
