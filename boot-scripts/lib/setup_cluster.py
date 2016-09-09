@@ -6,6 +6,7 @@ import sys
 import pymongo
 import time
 from pymongo import ReadPreference, collection, database
+import os
 
 MONGO_DATA_DIR = "/data/db/"
 AGENT_INSTALL_LOCATION = "/usr/bin/mongod"
@@ -136,6 +137,7 @@ def add_collection():
     :return:
     '''
     try:
+	 print "=============="+os.environ("DATABASE_NAME")+"================"
          connection = pymongo.MongoClient()
          database.Database(connection, "cloudcoreodb")
          db = connection.get_database("cloudcoreodb")
