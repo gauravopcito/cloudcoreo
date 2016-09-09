@@ -137,11 +137,8 @@ def add_collection():
     :return:
     '''
     try:
-	 print "=============="+os.environ.get("DATABASE_NAME")+"================"
-         connection = pymongo.MongoClient()
-         database.Database(connection, "cloudcoreodb")
-         db = connection.get_database("cloudcoreodb")
-         db.create_collection("cloudcoreocoll")
+         call("/usr/bin/mongo " + node_list[1][0]["private_ip"] + ":" + MONGODB_PORT + "/" + os.environ.get("DATABASE_NAME")
+              + " --eval 'printjson(db.createCollection(\"" - + os.environ.get("COLLECTION_NAME") + "\"))'", shell=True)
          print "Collection get created successfully."
     except Exception as e:
         print "Collection not get added. ==>>" + e.message
@@ -153,9 +150,9 @@ def add_database_user():
     :return:
     '''
     try:
-        connection = pymongo.MongoClient()
-        db = connection.get_database("cloudcoreodb")
-        db.add_user("cloudcoreouser", "cloudcoreopass", roles=[{ "role" : "readWrite", "db" : "cloudcoreodb"}])
+        call("/usr/bin/mongo " + node_list[1][0]["private_ip"] + ":" + MONGODB_PORT + "/" + os.environ.get("DATABASE_NAME")
+             + " --eval 'printjson(db.createUser( { user: \"" - + os.environ.get("MASTER_USER") + "\", pwd: \"" +
+             os.environ.get("MASTER_PASSWORD") + "\", roles: [ \"readWrite\" ] } ))'", shell=True)
         print "User get created successfully."
     except Exception as e:
         print "User not get added. ==>>" + e.message
