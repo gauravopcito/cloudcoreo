@@ -236,4 +236,10 @@ coreo_aws_ec2_autoscaling "${CLUSTER_NAME}" do
             :upgrade_on => "dirty",
             :cooldown => ${CLUSTER_UPGRADE_COOLDOWN}
         })
+  environment_variables [
+                         "DATABASE_NAME=${DATABASE_NAME}}",
+			 "COLLECTION_NAME=${COLLECTION_NAME}}",
+			 "MASTER_USER=${MASTER_USER}}",
+			 "MASTER_PASSWORD=${MASTER_PASSWORD}}",
+                        ]
 end
