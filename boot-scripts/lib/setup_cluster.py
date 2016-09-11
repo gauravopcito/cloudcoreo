@@ -139,7 +139,7 @@ def add_collection():
     try:
          #call("/usr/bin/mongo " + node_list[1][0]["private_ip"] + ":" + MONGODB_PORT + "/" + os.environ.get#("DATABASE_NAME")
               #+ " --eval 'printjson(db.createCollection(\"" - + os.environ.get("COLLECTION_NAME") + #"\"))'", shell=True)
-         connection = Connection()
+         connection = pymongo.MongoClient()
          db = connection[os.environ.get("DATABASE_NAME")]
          collection = db[os.environ.get("COLLECTION_NAME")]
          print "Collection get created successfully."
