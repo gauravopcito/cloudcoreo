@@ -5,7 +5,7 @@ import yaml
 import sys
 import pymongo
 import time
-from pymongo import ReadPreference, collection, database, Connection
+from pymongo import ReadPreference, collection, database
 import os
 
 MONGO_DATA_DIR = "/data/db/"
