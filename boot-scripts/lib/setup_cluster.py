@@ -139,6 +139,7 @@ def add_collection():
     try:
          #call("/usr/bin/mongo " + node_list[1][0]["private_ip"] + ":" + MONGODB_PORT + "/" + os.environ.get#("DATABASE_NAME")
               #+ " --eval 'printjson(db.createCollection(\"" - + os.environ.get("COLLECTION_NAME") + #"\"))'", shell=True)
+	 print "Add collection started..."
          connection = pymongo.MongoClient()
          db = connection[os.environ.get("DATABASE_NAME")]
          collection = db[os.environ.get("COLLECTION_NAME")]
@@ -153,6 +154,7 @@ def add_database_user(node_list):
     :return:
     '''
     try:
+	print "Add database user started..."
         call("/usr/bin/mongo " + node_list[1][0]["private_ip"] + ":" + MONGODB_PORT + "/" + os.environ.get("DATABASE_NAME")
              + " --eval 'printjson(db.createUser( { user: \"" - + os.environ.get("MASTER_USER") + "\", pwd: \"" +
              os.environ.get("MASTER_PASSWORD") + "\", roles: [ \"readWrite\" ] } ))'", shell=True)
