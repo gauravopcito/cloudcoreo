@@ -128,7 +128,7 @@ def configure_replica_set():
 
         add_collection()
 
-        add_database_user()
+        add_database_user(node_list)
 
 
 def add_collection():
@@ -147,7 +147,7 @@ def add_collection():
         print "Collection not get added. ==>>" + e.message
 
 
-def add_database_user():
+def add_database_user(node_list):
     '''
     add database user
     :return:
