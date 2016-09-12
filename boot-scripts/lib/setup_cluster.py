@@ -137,12 +137,9 @@ def add_collection():
     :return:
     '''
     try:
-         #call("/usr/bin/mongo " + node_list[1][0]["private_ip"] + ":" + MONGODB_PORT + "/" + os.environ.get#("DATABASE_NAME")
-              #+ " --eval 'printjson(db.createCollection(\"" - + os.environ.get("COLLECTION_NAME") + #"\"))'", shell=True)
 	 print "Add collection started..."
-         connection = pymongo.MongoClient()
-         db = connection[os.environ.get("DATABASE_NAME")]
-         collection = db[os.environ.get("COLLECTION_NAME")]
+         call("/usr/bin/mongo " + node_list[1][0]["private_ip"] + ":" + MONGODB_PORT + "/" + os.environ.get("DATABASE_NAME")
+              + " --eval 'printjson(db.createCollection(\"" - + os.environ.get("COLLECTION_NAME") + "\"))'", shell=True)
          print "Collection get created successfully."
     except Exception as e:
         print "Collection not get added. ==>>" + e.message
