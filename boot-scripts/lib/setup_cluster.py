@@ -125,20 +125,20 @@ def configure_replica_set():
                 if retry == max_try:
                     print "Failed to configure replica set."
 
-        add_collection()
+        add_collection(node_list)
 
         add_database_user(node_list)
 
 
-def add_collection():
+def add_collection(node_list):
     '''
     add collection
     :return:
     '''
     try:
-	 print "Add collection started..."
-         call("/usr/bin/mongo " + node_list[1][0]["private_ip"] + ":" + MONGODB_PORT + "/" + os.environ.get("DATABASE_NAME")
-              + " --eval 'printjson(db.createCollection(\"" - + os.environ.get("COLLECTION_NAME") + "\"))'", shell=True)
+         connection = pymongo.MongoClient()
+         db = connection.cloudcoreodb
+         db.create_collection("cloudcoreocoll")
          print "Collection get created successfully."
     except Exception as e:
         print "Collection not get added. ==>>" + e.message
@@ -150,10 +150,9 @@ def add_database_user(node_list):
     :return:
     '''
     try:
-	print "Add database user started..."
-        call("/usr/bin/mongo " + node_list[1][0]["private_ip"] + ":" + MONGODB_PORT + "/" + os.environ.get("DATABASE_NAME")
-             + " --eval 'printjson(db.createUser( { user: \"" - + os.environ.get("MASTER_USER") + "\", pwd: \"" +
-             os.environ.get("MASTER_PASSWORD") + "\", roles: [ \"readWrite\" ] } ))'", shell=True)
+        connection = pymongo.MongoClient()
+        db = connection.cloudcoreodb
+        db.add_user("cloudcoreouser", "cloudcoreopass", roles=[{ "role" : "readWrite", "db" : "cloudcoreodb"}])
         print "User get created successfully."
     except Exception as e:
         print "User not get added. ==>>" + e.message
