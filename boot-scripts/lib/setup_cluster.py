@@ -136,9 +136,13 @@ def add_collection(node_list):
     :return:
     '''
     try:
+	 print "Start creating collection..."
          connection = pymongo.MongoClient()
+	 db = connection.admin
          db = connection.cloudcoreodb
+	 print "Database get created."
          db.create_collection("cloudcoreocoll")
+	 print "Collection get created."
          print "Collection get created successfully."
     except Exception as e:
         print "Collection not get added. ==>>" + e.message
@@ -150,7 +154,9 @@ def add_database_user(node_list):
     :return:
     '''
     try:
+	print "Start creating user."
         connection = pymongo.MongoClient()
+	db = connection.admin
         db = connection.cloudcoreodb
         db.add_user("cloudcoreouser", "cloudcoreopass", roles=[{ "role" : "readWrite", "db" : "cloudcoreodb"}])
         print "User get created successfully."
