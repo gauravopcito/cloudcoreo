@@ -125,24 +125,22 @@ def configure_replica_set():
                 if retry == max_try:
                     print "Failed to configure replica set."
 
-        add_collection()
+        add_collection(node_list)
 
         add_database_user(node_list)
 
 
-def add_collection():
+def add_collection(node_list):
     '''
     add collection
     :return:
     '''
     try:
 	 print "Start creating collection..."
-         connection = pymongo.MongoClient()
-	 db = connection.get_database("admin")
+         connection = pymongo.MongoClient(node_list[1][0]["private_ip"],27017)
          db = connection.get_database("cloudcoreodb")
          print "Database created successfully."
-         db = connection.get_database("admin")
-         db.create_collection("cloudcoreodb", "cloudcoreocoll")
+         db.create_collection("cloudcoreocoll")
          print "Collection get created successfully."
     except Exception as e:
         print "Collection not get added. ==>>" + e.message
