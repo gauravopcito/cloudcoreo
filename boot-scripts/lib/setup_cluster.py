@@ -10,7 +10,8 @@ import os
 MONGO_DATA_DIR = "/data/db/"
 CONFIG_SERVER_DATA_DIR = "/data/configdb/"
 MONGOD_INSTALL_LOCATION = "/usr/bin/mongod"
-MONGOS_INSTALL_LOCATION = "/usr/bin/mongo "
+MONGO_INSTALL_LOCATION = "/usr/bin/mongo "
+MONGOS_INSTALL_LOCATION = "/usr/bin/mongos "
 MONGODB_PORT = "27017"
 CONFIG_SERVER_PORT = "27019"
 QUERY_ROUTER_PORT = "27020"
@@ -91,7 +92,7 @@ def setup_cluster():
                     break
                 elif node_type == "config":
                     config_server_host_list = data[len(data) - 2]["config"]
-                    configure_config_server(config_server_host_list)
+                    configure_config_server()
                     break
                 elif node_type == "router":
                     query_routers_host_list = data[len(data)-1]["router"]
@@ -151,7 +152,7 @@ def configure_replica_set(replica_host_list, config_server_list, is_master):
         add_database_user()
 
 
-def configure_config_server(node_list):
+def configure_config_server():
     '''
     Configure config servers i.e mongo instances
     :return:
@@ -160,13 +161,13 @@ def configure_config_server(node_list):
         print "Config server configuration started."
         call("service mongod stop", shell=True)
         call("mkdir " + CONFIG_SERVER_DATA_DIR + "  -p ", shell=True)
-        call("chown " + CONFIG_SERVER_DATA_DIR, shell=True)
+        #call("chown " + CONFIG_SERVER_DATA_DIR, shell=True)
         command = MONGOD_INSTALL_LOCATION + " --configsvr --dbpath " + MONGO_DB_CONFIG_SERVER_DATA_PATH + " --logpath " + \
                   MONGO_DB_CONFIG_LOG_PATH + " --port " + CONFIG_SERVER_PORT + " < /dev/null > /dev/null 2>&1&"
         call("echo \"" + command + "\" > /tmp/mongo.sh", shell=True)
         call("bash /tmp/mongo.sh &", shell=True)
     except Exception as e:
-        print "Config server configuration fail." + e.message
+        print "Exception while configuring config server. " + e.message
 
 def configure_query_routers(config_server_host_list):
     '''
@@ -184,13 +185,13 @@ def configure_query_routers(config_server_host_list):
             else:
                 config_server_hostname_string = config_server_hostname_string + host_dict["private_ip"] + ":" + CONFIG_SERVER_PORT
 
-        command = MONGOD_INSTALL_LOCATION + " --logpath " + MONGO_DB_CONFIG_LOG_PATH + " --configdb " \
-                  + config_server_hostname_string + " < /dev/null > /dev/null 2>&1&"
+        command = MONGOS_INSTALL_LOCATION + " --logpath " + MONGO_DB_CONFIG_LOG_PATH + " --configdb " \
+                  + config_server_hostname_string + " --"+ QUERY_ROUTER_PORT + " < /dev/null > /dev/null 2>&1&"
         call("echo \"" + command + "\" > /tmp/mongo.sh", shell=True)
         call("bash /tmp/mongo.sh &", shell=True)
         print "Query router configuration completed."
     except Exception as e:
-        print "Query router configuration fail." + e.message
+        print "Exception while configuring query routers. " + e.message
 
 
 def add_shard_to_cluster(query_routers_host_list, node_list):
@@ -206,12 +207,12 @@ def add_shard_to_cluster(query_routers_host_list, node_list):
             if replica_ips["node_type"] == "primary":
                 print "=======" + replica_ips[0] + "========="
                 # Here we need to specify replicaset name and host name to add shard
-                call(MONGOS_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT +
+                call(MONGO_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT +
                      "/admin --eval 'db.runCommand( {addShard : \"" + replica_ips[0] + "/" + replica_ips["private_ip"]
                      + ":" + MONGODB_PORT + "\"})'")
         print "Add shard to cluster completed."
     except Exception as e:
-        print "Add shard to cluster fail" + e.message
+        print "Exception while adding shard to cluster. " + e.message
 
 
 def add_database_and_shard_collections(query_routers_host_list):
@@ -223,7 +224,7 @@ def add_database_and_shard_collections(query_routers_host_list):
         print "Add database and shard collection started."
         query_router_host = query_routers_host_list[0]["private_ip"]
         call("service mongod stop", shell=True)
-        call(MONGOS_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT
+        call(MONGO_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT
              + "/admin --eval 'printjson(db.runCommand( { enableSharding: \"" + os.environ.get("DATABASE_NAME") + "\" }))'", shell=True)
         print "Sharding enabled successfully."
 
@@ -231,26 +232,26 @@ def add_database_and_shard_collections(query_routers_host_list):
         is_shard_keyhash_enable = 0
         if is_automatic_hash_on_id_enable == 1:
             print "In is_automatic_hash_on_id_enable."
-            call(MONGOS_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT + "/admin --eval 'printjson(db.runCommand( { shardCollection: \""
+            call(MONGO_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT + "/admin --eval 'printjson(db.runCommand( { shardCollection: \""
                  + os.environ.get("DATABASE_NAME") + "." + os.environ.get("COLLECTION_NAME") + "\", key: { \"_id\": \"hashed\" }}))'", shell=True)
             print "Sharded collection added successfully."
         else:
             # If no hash on shard key
             if is_shard_keyhash_enable == 1:
                 print "In is_shard_keyhash_enable."
-                call(MONGOS_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT + "/admin --eval 'printjson(db.runCommand( { shardCollection: \""
+                call(MONGO_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT + "/admin --eval 'printjson(db.runCommand( { shardCollection: \""
                      + os.environ.get("DATABASE_NAME") + "." + os.environ.get("COLLECTION_NAME") + "\", key: {\"" + "shardkey" + "\": \"hashed\"} } ))'", shell=True)
                 print "Out of is_shard_keyhash_enable."
             else:
                 print "In else is_shard_keyhash_enable."
-                call(MONGOS_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT + "/" + os.environ.get("DATABASE_NAME")
+                call(MONGO_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT + "/" + os.environ.get("DATABASE_NAME")
                      + " --eval 'printjson(db.createCollection(\"" + os.environ.get("COLLECTION_NAME") + "\"))'", shell=True)
-                call(MONGOS_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT + "/admin --eval 'printjson(db.runCommand( { shardCollection: \""
+                call(MONGO_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT + "/admin --eval 'printjson(db.runCommand( { shardCollection: \""
                      + os.environ.get("DATABASE_NAME") + "." + os.environ.get("COLLECTION_NAME") + "\", key: {\"" + "shardkey" + "\":1} } ))'", shell=True)
                 print "Out of else is_shard_keyhash_enable."
         print "Enable database and shard collection completed successfully."
     except Exception as e:
-        print "Exception while enabling database and sharding collections." + e.message
+        print "Exception while enabling database and sharding collections. " + e.message
 
 
 def add_collection(node_list):
@@ -264,7 +265,7 @@ def add_collection(node_list):
               + " --eval 'printjson(db.createCollection(\"" - + os.environ.get("COLLECTION_NAME") + "\"))'", shell=True)
          print "Add collection completed successfully."
     except Exception as e:
-        print "Exception while adding collection." + e.message
+        print "Exception while adding collection. " + e.message
 
 
 def add_database_user(node_list):
@@ -279,7 +280,7 @@ def add_database_user(node_list):
              os.environ.get("MASTER_PASSWORD") + "\", roles: [ \"readWrite\" ] } ))'", shell=True)
         print "Add database user completed successfully."
     except Exception as e:
-        print "Exception while adding database user." + e.message
+        print "Exception while adding database user. " + e.message
 
 
 def prepare_replica_nodes_list():
