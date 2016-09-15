@@ -51,8 +51,8 @@ def get_machine_data():
     stream = open(CLUSTER_FILE_LOCATION, "r")
     cluster_data = yaml.load_all(stream)
     for data in cluster_data:
-      for i, replica_item_list in enumerate(data.items()):
-        for replica_ips in replica_item_list[1]:
+      for i, replica_item_list in enumerate(data):
+        for replica_ips in replica_item_list.items()[0][1]:
             if replica_ips["private_ip"] == curlstdout:
                 is_master = replica_ips["is_master"]
                 machine_ip = replica_ips["private_ip"]
@@ -84,19 +84,22 @@ def setup_cluster():
     is_master, machine_ip, node_type = get_machine_data()
 
     for data in cluster_data:
-      for node_list in data.items():
-        for replica_ips in node_list[0][1]:
+      for node_list in data:
+        for replica_ips in node_list.items()[0][1]:
             if replica_ips["private_ip"] == machine_ip:
+                print "in first if condition."
                 if node_type == "primary" or node_type == "secondary":
+                    print "in second if condition."
                     configure_replica_set(node_list, is_master)
                     break
                 elif node_type == "config":
-                    config_server_host_list = data[len(data) - 2]["config"]
+                    print "in first elif condition."
                     configure_config_server()
                     break
                 elif node_type == "router":
-                    query_routers_host_list = data[len(data)-1]["router"]
-                    config_server_host_list = data[len(data)-2]["config"]
+                    print "in second elif condition."
+                    query_routers_host_list = data[len(data) - 1]["router"]
+                    config_server_host_list = data[len(data) - 2]["config"]
                     configure_query_routers(query_routers_host_list, config_server_host_list)
                     add_shard_to_cluster(query_routers_host_list, node_list)
                     add_database_and_shard_collections(query_routers_host_list)
