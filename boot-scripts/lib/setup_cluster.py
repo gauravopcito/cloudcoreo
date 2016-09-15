@@ -137,10 +137,15 @@ def add_collection(node_list):
     '''
     try:
 	 print "Start creating collection..."
-         connection = pymongo.MongoClient(node_list[1][0]["private_ip"],27017)
-         db = connection.get_database("cloudcoreodb")
-         print "Database created successfully."
-         db.create_collection("cloudcoreocoll")
+         connection = pymongo.MongoClient()
+         db = connection.cloudcoreodb
+	 print "Database get created."
+         collection = db.cloudcoreocoll
+	 print "Collection created successfully."
+	 doc = {"name":"Alberto","surname":"Negron"}
+	 collection.insert(doc)
+	 print "doc inserted successfully."
+	 print db.collection_names()
          print "Collection get created successfully."
     except Exception as e:
         print "Collection not get added. ==>>" + e.message
