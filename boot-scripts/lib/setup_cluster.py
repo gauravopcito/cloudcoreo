@@ -142,8 +142,9 @@ def add_collection(node_list):
 	 print "Database get created."
          collection = db.cloudcoreocoll
 	 print "Collection created successfully."
-	 doc = {"name":"Alberto","surname":"Negron"}
-	 collection.insert(doc)
+	 coll = db.get_collection("cloudcoreocoll")
+         doc = {"name": "Alberto", "surname": "Negron"}
+         coll.insert_one(doc)
 	 print "doc inserted successfully."
 	 print db.collection_names()
          print "Collection get created successfully."
