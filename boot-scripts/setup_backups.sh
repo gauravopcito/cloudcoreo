@@ -25,7 +25,7 @@ backup_bucket_region="${BACKUP_BUCKET_REGION:-us-east-1}"
 backup_dump_dir="/opt/backups"
 
 private_ip_address="${PRIVATE_IP_ADDRESS}"
-instance_ids="${INSTANCE_IDS}"
+#instance_ids="${INSTANCE_IDS}"
 NAMESERVERS=("${private_ip_address}" "${private_ip_address}")
  
 # get length of an array
