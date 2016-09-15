@@ -107,7 +107,7 @@ def setup_cluster():
                     break
 
 
-def configure_replica_set(replica_host_list, config_server_list, is_master):
+def configure_replica_set(replica_host_list, is_master):
     '''
     Configures the replica set
     :return:
