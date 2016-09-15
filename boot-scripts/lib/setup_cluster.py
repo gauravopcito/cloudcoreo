@@ -141,8 +141,7 @@ def add_collection(node_list):
 	 db = connection.admin
          db = connection.cloudcoreodb
 	 print "Database get created."
-         db.create_collection("cloudcoreocoll")
-	 print "Collection get created."
+         db.cloudcoreocoll
          print "Collection get created successfully."
     except Exception as e:
         print "Collection not get added. ==>>" + e.message
