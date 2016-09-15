@@ -6,6 +6,9 @@ import sys
 import pymongo
 import time
 import os
+import boto
+from boto import s3
+from group_addresses import get_region
 
 MONGO_DATA_DIR = "/data/db/"
 CONFIG_SERVER_DATA_DIR = "/data/configdb/"
@@ -114,10 +117,11 @@ def configure_replica_set(replica_host_list, is_master):
     '''
 
     print "Configure replica set of MongoDB started..."
+    replica_name = replica_host_list.items()[0][0]
     call("service mongod stop", shell=True)
     call("mkdir " + MONGO_DATA_DIR + "  -p ", shell=True)
-    print "replica name " + replica_host_list[0]
-    command = MONGOD_INSTALL_LOCATION + " --replSet " + replica_host_list[0] + " --port " + MONGODB_PORT \
+    print "replica name " + replica_name
+    command = MONGOD_INSTALL_LOCATION + " --replSet " + replica_name + " --port " + MONGODB_PORT \
               + " --logpath " + MONGO_DB_CONFIG_LOG_PATH + " --dbpath " + MONGO_DATA_DIR \
               + " --rest < /dev/null > /dev/null 2>&1&  "
     call("echo \"" + command + "\" > /tmp/mongo.sh", shell=True)
@@ -127,10 +131,10 @@ def configure_replica_set(replica_host_list, is_master):
     # if this is a master instance update node configuration
     if is_master:
         connection = pymongo.MongoClient()
-        conf = {'_id': replica_host_list[0],
-                     'members': [{'_id': 0, 'host': replica_host_list[1][0]["private_ip"] + ":27017"},
-                                 {'_id': 1, 'host': replica_host_list[1][1]["private_ip"] + ":27017"},
-                                 {'_id': 2, 'host': replica_host_list[1][2]["private_ip"] + ":27017"}]}
+        members_list = []
+        for index, replica_ips in enumerate(replica_host_list.items()[0][1]):
+            members_list.append({'_id': index, 'host': replica_ips["private_ip"] + ":" + MONGODB_PORT})
+        conf = {'_id': replica_name, 'members': members_list}
         db = connection.get_database("admin")
 
         retry = 1
@@ -172,6 +176,7 @@ def configure_config_server():
         call("bash /tmp/mongo.sh &", shell=True)
     except Exception as e:
         print "Exception while configuring config server. " + e.message
+
 
 def configure_query_routers(config_server_host_list):
     '''
