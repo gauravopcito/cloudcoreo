@@ -193,6 +193,26 @@ variables:
         type: string
         required: false
         default: mongodbcluster
+    DATABASE_NAME:
+        default: cloudcoreodb
+        description: Database name to create
+        required: false
+        type: string
+    COLLECTION_NAME:
+        default: cloudcoreocoll
+        description: Collection name to create
+        required: false
+        type: string
+    MASTER_USER:
+        default: cloudcoreouser
+        description: Master user name
+        required: false
+        type: string
+    MASTER_PASSWORD:
+        default: cloudcoreopass
+        description: Master password
+        required: false
+        type: string
     DATADOG_KEY:
         default: null
         value: null
@@ -227,23 +247,3 @@ variables:
         default: /data/db
         description: If you want the mongodb data dir to be something other than /data/db set it here
         required: false
-    DATABASE_NAME:
-        default: cloudcoreodb
-        description: Database name to create
-        required: false
-        type: string
-    COLLECTION_NAME:
-        default: cloudcoreocoll
-        description: Collection name to create
-        required: false
-        type: string
-    MASTER_USER:
-        default: cloudcoreouser
-        description: Master user name
-        required: false
-        type: string
-    MASTER_PASSWORD:
-        default: cloudcoreopass
-        description: Master password
-        required: false
-        type: string

@@ -5,7 +5,7 @@ import yaml
 import sys
 import pymongo
 import time
-from pymongo import ReadPreference
+import os
 
 MONGO_DATA_DIR = "/data/db/"
 AGENT_INSTALL_LOCATION = "/usr/bin/mongod"
@@ -108,7 +108,7 @@ def configure_replica_set():
 
         retry = 1
         max_try = 10
-        while retry <= max_try:
+        while retry < max_try:
             is_retry_required = False
             try:
                 db.command('replSetInitiate', conf, check=True)
@@ -125,9 +125,9 @@ def configure_replica_set():
                 if retry == max_try:
                     print "Failed to configure replica set."
 
-        #add_collection(node_list)
+        add_collection(node_list)
 
-        #add_database_user(node_list)
+        add_database_user(node_list)
 
 
 def add_collection(node_list):
@@ -137,7 +137,7 @@ def add_collection(node_list):
     '''
     try:
          connection = pymongo.MongoClient()
-         db = connection.get_database("cloudcoreodb", read_preference=ReadPreference.PRIMARY)
+         db = connection.cloudcoreodb
          db.create_collection("cloudcoreocoll")
          print "Collection get created successfully."
     except Exception as e:
@@ -151,7 +151,7 @@ def add_database_user(node_list):
     '''
     try:
         connection = pymongo.MongoClient()
-        db = connection.get_database("cloudcoreodb", read_preference=ReadPreference.PRIMARY)
+        db = connection.cloudcoreodb
         db.add_user("cloudcoreouser", "cloudcoreopass", roles=[{ "role" : "readWrite", "db" : "cloudcoreodb"}])
         print "User get created successfully."
     except Exception as e:
