@@ -120,7 +120,6 @@ def configure_replica_set(replica_host_list, is_master):
     replica_name = replica_host_list.items()[0][0]
     call("service mongod stop", shell=True)
     call("mkdir " + MONGO_DATA_DIR + "  -p ", shell=True)
-    print "replica name " + replica_name
     command = MONGOD_INSTALL_LOCATION + " --replSet " + replica_name + " --port " + MONGODB_PORT \
               + " --logpath " + MONGO_DB_CONFIG_LOG_PATH + " --dbpath " + MONGO_DATA_DIR \
               + " --rest < /dev/null > /dev/null 2>&1&  "
@@ -155,9 +154,10 @@ def configure_replica_set(replica_host_list, is_master):
                 print "retrying mongo db configuration."
                 if retry == max_try:
                     print "Failed to configure replica set."
-
+	
         add_collection()
         add_database_user()
+     print "Configure replica set of MongoDB completed..."
 
 
 def configure_config_server():
