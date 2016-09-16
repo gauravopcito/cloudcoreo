@@ -6,6 +6,9 @@ import sys
 import pymongo
 import time
 import os
+import boto
+from boto import s3
+from group_addresses import get_region
 
 MONGO_DATA_DIR = "/data/db/"
 CONFIG_SERVER_DATA_DIR = "/data/configdb/"
@@ -58,11 +61,12 @@ def get_machine_data():
     cluster_data = yaml.load_all(stream)
     for data in cluster_data:
       for i, replica_item_list in enumerate(data):
-        for replica_ips in replica_item_list.items()[0][1]:
-            if replica_ips["private_ip"] == curlstdout:
-                is_master = replica_ips["is_master"]
-                machine_ip = replica_ips["private_ip"]
-                node_type = replica_ips["node_type"]
+        for replica_ips in replica_item_list.values():
+            for host in replica_ips:
+              if host["private_ip"] == curlstdout:
+                is_master = host["is_master"]
+                machine_ip = host["private_ip"]
+                node_type = host["node_type"]
 
     return is_master, machine_ip, node_type
 
@@ -91,26 +95,27 @@ def setup_cluster():
 
     for data in cluster_data:
       for node_list in data:
-        for replica_ips in node_list.items()[0][1]:
-            if replica_ips["private_ip"] == machine_ip:
-                print "in first if condition."
-                if node_type == "primary" or node_type == "secondary":
-                    print "in second if condition."
-                    configure_replica_set(node_list, is_master)
-                    break
-                elif node_type == "config":
-                    print "in first elif condition."
-                    configure_config_server()
-                    break
-                elif node_type == "router":
-                    print "in second elif condition."
-                    query_routers_host_list = data[len(data) - 1]["router"]
-                    config_server_host_list = data[len(data) - 2]["config"]
-                    configure_query_routers(query_routers_host_list, config_server_host_list)
-                    add_shard_to_cluster(query_routers_host_list, data)
-                    add_database_and_shard_collections(query_routers_host_list)
-                    add_database_user(query_routers_host_list)
-                    break
+        for replica_ips in node_list.values():
+            for host in replica_ips:
+                if host["private_ip"] == machine_ip:
+                    print "in first if condition."
+                    if node_type == "primary" or node_type == "secondary":
+                        print "in second if condition."
+                        configure_replica_set(node_list, is_master)
+                        break
+                    elif node_type == "config":
+                        print "in first elif condition."
+                        configure_config_server()
+                        break
+                    elif node_type == "router":
+                        print "in second elif condition."
+                        query_routers_host_list = data[len(data) - 1]["router"]
+                        config_server_host_list = data[len(data) - 2]["config"]
+                        configure_query_routers(config_server_host_list)
+                        add_shard_to_cluster(query_routers_host_list, data)
+                        add_database_and_shard_collections(query_routers_host_list)
+                        add_database_user(query_routers_host_list)
+                        break
 
 
 def configure_replica_set(replica_host_list, is_master):
@@ -120,10 +125,9 @@ def configure_replica_set(replica_host_list, is_master):
     '''
 
     print "Configure replica set of MongoDB started..."
-    replica_name = replica_host_list.items()[0][0]
+    replica_name = replica_host_list.keys()
     call("service mongod stop", shell=True)
     call("mkdir " + MONGO_DATA_DIR + "  -p ", shell=True)
-    print "replica name " + replica_name
     command = MONGOD_INSTALL_LOCATION + " --replSet " + replica_name + " --port " + MONGODB_PORT \
               + " --logpath " + MONGO_DB_CONFIG_LOG_PATH + " --dbpath " + MONGO_DATA_DIR \
               + " --rest < /dev/null > /dev/null 2>&1&  "
@@ -149,8 +153,9 @@ def configure_replica_set(replica_host_list, is_master):
         print "Master node configuration started."
         connection = pymongo.MongoClient()
         members_list = []
-        for index, replica_ips in enumerate(replica_host_list.items()[0][1]):
-            members_list.append({'_id': index, 'host': replica_ips["private_ip"] + ":" + MONGODB_PORT})
+        for index, replica_ips in enumerate(replica_host_list.values()):
+            for host in replica_ips:
+                members_list.append({'_id': index, 'host': host["private_ip"] + ":" + MONGODB_PORT})
         conf = {'_id': replica_name, 'members': members_list}
         db = connection.get_database("admin")
 
@@ -187,7 +192,6 @@ def configure_config_server():
         print "Config server configuration started."
         call("service mongod stop", shell=True)
         call("mkdir " + CONFIG_SERVER_DATA_DIR + "  -p ", shell=True)
-        #call("chown " + CONFIG_SERVER_DATA_DIR, shell=True)
         command = MONGOD_INSTALL_LOCATION + " --configsvr --dbpath " + MONGO_DB_CONFIG_SERVER_DATA_PATH + " --logpath " + \
                   MONGO_DB_CONFIG_LOG_PATH + " --port " + CONFIG_SERVER_PORT + " < /dev/null > /dev/null 2>&1&"
         call("echo \"" + command + "\" > /tmp/mongo.sh", shell=True)
@@ -206,11 +210,12 @@ def configure_query_routers(config_server_host_list):
         call("service mongod stop", shell=True)
         config_server_hostname_string = ""
         number_of_host = len(config_server_host_list.items()[0][1])
-        for index, host_dict in enumerate(config_server_host_list.items()[0][1]):
-            if index != number_of_host-1:
-                config_server_hostname_string = config_server_hostname_string + host_dict["private_ip"] + ":" + CONFIG_SERVER_PORT + ","
-            else:
-                config_server_hostname_string = config_server_hostname_string + host_dict["private_ip"] + ":" + CONFIG_SERVER_PORT
+        for index, host_dict in enumerate(config_server_host_list.values()):
+            for host in host_dict:
+                if index != number_of_host-1:
+                    config_server_hostname_string = config_server_hostname_string + host["private_ip"] + ":" + CONFIG_SERVER_PORT + ","
+                else:
+                    config_server_hostname_string = config_server_hostname_string + host["private_ip"] + ":" + CONFIG_SERVER_PORT
 
         command = MONGOS_INSTALL_LOCATION + " --logpath " + MONGO_DB_CONFIG_LOG_PATH + " --configdb " \
                   + config_server_hostname_string + " --" + MONGODB_PORT + " < /dev/null > /dev/null 2>&1&"
@@ -228,16 +233,17 @@ def add_shard_to_cluster(query_routers_host_list, data):
     '''
     try:
         print "Add shard to cluster started."
-        query_router_host = query_routers_host_list.items()[0][1]["private_ip"]
+        is_master, query_router_host, node_type = get_machine_data()
         call("service mongod stop", shell=True)
         for node_list in data:
-            replica_name = node_list.items()[0][0]
-            for replica_ips in node_list.items()[0][1]:
-                if replica_ips["node_type"] == "primary":
-                    # Here we need to specify replicaset name and host name to add shard
-                    call(MONGO_INSTALL_LOCATION + " " + query_router_host + ":" + MONGODB_PORT +
-                         "/admin --eval 'db.runCommand( {addShard : \"" + replica_name + "/" + replica_ips["private_ip"]
-                         + ":" + MONGODB_PORT + "\"})'")
+            replica_name = node_list.keys()
+            for replica_ips in node_list.values():
+                for host in replica_ips:
+                    if host["node_type"] == "primary":
+                        # Here we need to specify replicaset name and host name to add shard
+                        call(MONGO_INSTALL_LOCATION + " " + query_router_host + ":" + MONGODB_PORT +
+                             "/admin --eval 'db.runCommand( {addShard : \"" + replica_name + "/" + host["private_ip"]
+                             + ":" + MONGODB_PORT + "\"})'")
         print "Add shard to cluster completed."
     except Exception as e:
         print "Exception while adding shard to cluster. " + e.message
@@ -250,7 +256,7 @@ def add_database_and_shard_collections(query_routers_host_list):
     '''
     try:
         print "Add database and shard collection started."
-        query_router_host = query_routers_host_list.items()[0][1]["private_ip"]
+        is_master, query_router_host, node_type = get_machine_data()
         call("service mongod stop", shell=True)
         call(MONGO_INSTALL_LOCATION + " " + query_router_host + ":" + MONGODB_PORT
              + "/admin --eval 'printjson(db.runCommand( { enableSharding: \"" + os.environ.get("DATABASE_NAME") + "\" }))'", shell=True)
