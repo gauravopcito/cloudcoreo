@@ -157,7 +157,7 @@ def configure_replica_set(replica_host_list, is_master):
 	
         add_collection()
         add_database_user()
-     print "Configure replica set of MongoDB completed..."
+    print "Configure replica set of MongoDB completed..."
 
 
 def configure_config_server():
