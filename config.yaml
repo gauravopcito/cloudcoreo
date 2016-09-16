@@ -86,7 +86,7 @@ variables:
         description: name this mongodb deployment
         required: true
     CLUSTER_SIZE:
-        default: t2.micro
+        default: t2.small
         description: the image size to launch
         required: true
     CLUSTER_GROUP_SIZE_MIN:
@@ -133,7 +133,7 @@ variables:
         required: true
         type: Array
     MONGO_SIZE:
-        default: t2.micro
+        default: t2.small
         description: null
         required: true
     MONGO_GROUP_SIZE_MIN:
