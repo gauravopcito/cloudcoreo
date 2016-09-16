@@ -6,9 +6,6 @@ import sys
 import pymongo
 import time
 import os
-import boto
-from boto import s3
-from group_addresses import get_region
 
 MONGO_DATA_DIR = "/data/db/"
 CONFIG_SERVER_DATA_DIR = "/data/configdb/"
@@ -49,14 +46,6 @@ def read_cluster_file():
     cluster_data = yaml.load_all(stream)
     return cluster_data
 
-def upload_cluster_file_to_s3_bucket():
-    '''
-
-    :return:
-    '''
-    boto
-    S3 = boto.s3.connect_to_region(get_region())
-    S3
 
 def get_machine_data():
     '''
@@ -224,7 +213,7 @@ def configure_query_routers(config_server_host_list):
                 config_server_hostname_string = config_server_hostname_string + host_dict["private_ip"] + ":" + CONFIG_SERVER_PORT
 
         command = MONGOS_INSTALL_LOCATION + " --logpath " + MONGO_DB_CONFIG_LOG_PATH + " --configdb " \
-                  + config_server_hostname_string + " --"+ QUERY_ROUTER_PORT + " < /dev/null > /dev/null 2>&1&"
+                  + config_server_hostname_string + " --" + MONGODB_PORT + " < /dev/null > /dev/null 2>&1&"
         call("echo \"" + command + "\" > /tmp/mongo.sh", shell=True)
         call("bash /tmp/mongo.sh &", shell=True)
         print "Query router configuration completed."
@@ -246,7 +235,7 @@ def add_shard_to_cluster(query_routers_host_list, data):
             for replica_ips in node_list.items()[0][1]:
                 if replica_ips["node_type"] == "primary":
                     # Here we need to specify replicaset name and host name to add shard
-                    call(MONGO_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT +
+                    call(MONGO_INSTALL_LOCATION + " " + query_router_host + ":" + MONGODB_PORT +
                          "/admin --eval 'db.runCommand( {addShard : \"" + replica_name + "/" + replica_ips["private_ip"]
                          + ":" + MONGODB_PORT + "\"})'")
         print "Add shard to cluster completed."
@@ -263,7 +252,7 @@ def add_database_and_shard_collections(query_routers_host_list):
         print "Add database and shard collection started."
         query_router_host = query_routers_host_list.items()[0][1]["private_ip"]
         call("service mongod stop", shell=True)
-        call(MONGO_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT
+        call(MONGO_INSTALL_LOCATION + " " + query_router_host + ":" + MONGODB_PORT
              + "/admin --eval 'printjson(db.runCommand( { enableSharding: \"" + os.environ.get("DATABASE_NAME") + "\" }))'", shell=True)
         print "Sharding enabled successfully."
 
@@ -271,21 +260,21 @@ def add_database_and_shard_collections(query_routers_host_list):
         is_shard_keyhash_enable = 0
         if is_automatic_hash_on_id_enable == 1:
             print "In is_automatic_hash_on_id_enable."
-            call(MONGO_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT + "/admin --eval 'printjson(db.runCommand( { shardCollection: \""
+            call(MONGO_INSTALL_LOCATION + " " + query_router_host + ":" + MONGODB_PORT + "/admin --eval 'printjson(db.runCommand( { shardCollection: \""
                  + os.environ.get("DATABASE_NAME") + "." + os.environ.get("COLLECTION_NAME") + "\", key: { \"_id\": \"hashed\" }}))'", shell=True)
             print "Sharded collection added successfully."
         else:
             # If no hash on shard key
             if is_shard_keyhash_enable == 1:
                 print "In is_shard_keyhash_enable."
-                call(MONGO_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT + "/admin --eval 'printjson(db.runCommand( { shardCollection: \""
+                call(MONGO_INSTALL_LOCATION + " " + query_router_host + ":" + MONGODB_PORT + "/admin --eval 'printjson(db.runCommand( { shardCollection: \""
                      + os.environ.get("DATABASE_NAME") + "." + os.environ.get("COLLECTION_NAME") + "\", key: {\"" + "shardkey" + "\": \"hashed\"} } ))'", shell=True)
                 print "Out of is_shard_keyhash_enable."
             else:
                 print "In else is_shard_keyhash_enable."
-                call(MONGO_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT + "/" + os.environ.get("DATABASE_NAME")
+                call(MONGO_INSTALL_LOCATION + " " + query_router_host + ":" + MONGODB_PORT + "/" + os.environ.get("DATABASE_NAME")
                      + " --eval 'printjson(db.createCollection(\"" + os.environ.get("COLLECTION_NAME") + "\"))'", shell=True)
-                call(MONGO_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT + "/admin --eval 'printjson(db.runCommand( { shardCollection: \""
+                call(MONGO_INSTALL_LOCATION + " " + query_router_host + ":" + MONGODB_PORT + "/admin --eval 'printjson(db.runCommand( { shardCollection: \""
                      + os.environ.get("DATABASE_NAME") + "." + os.environ.get("COLLECTION_NAME") + "\", key: {\"" + "shardkey" + "\":1} } ))'", shell=True)
                 print "Out of else is_shard_keyhash_enable."
         print "Enable database and shard collection completed successfully."
