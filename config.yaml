@@ -56,6 +56,16 @@ variables:
         description: a tcp port the ELB will check every so often - this defines health and ASG termination
         type: number
         required: true
+    CLUSTER_TCP_HEALTH_CHECK_PORT_CONFIG:
+        default: 27019
+        description: a tcp port the ELB will check every so often - this defines health and ASG termination
+        type: number
+        required: true
+    CLUSTER_TCP_HEALTH_CHECK_PORT_QUERY:
+        default: 27020
+        description: a tcp port the ELB will check every so often - this defines health and ASG termination
+        type: number
+        required: true
     DNS_ZONE:
         description: the zone in which the internal elb dns entry should be maintained
         type: String

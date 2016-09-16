@@ -65,6 +65,36 @@ coreo_aws_ec2_elb "${CLUSTER_NAME}-elb" do
   health_check_healthy_threshold 2
 end
 
+coreo_aws_ec2_elb "${CLUSTER_NAME}-elb" do
+  action :sustain
+  type "internal"
+  vpc "${VPC_NAME}"
+  subnet "${PRIVATE_SUBNET_NAME}"
+  security_groups ["${CLUSTER_NAME}-elb"]
+  listeners ${ELB_LISTENERS}
+  health_check_protocol 'tcp'
+  health_check_port "${CLUSTER_TCP_HEALTH_CHECK_PORT_CONFIG}"
+  health_check_timeout 5
+  health_check_interval 120
+  health_check_unhealthy_threshold 5
+  health_check_healthy_threshold 2
+end
+
+coreo_aws_ec2_elb "${CLUSTER_NAME}-elb" do
+  action :sustain
+  type "internal"
+  vpc "${VPC_NAME}"
+  subnet "${PRIVATE_SUBNET_NAME}"
+  security_groups ["${CLUSTER_NAME}-elb"]
+  listeners ${ELB_LISTENERS}
+  health_check_protocol 'tcp'
+  health_check_port "${CLUSTER_TCP_HEALTH_CHECK_PORT_QUERY}"
+  health_check_timeout 5
+  health_check_interval 120
+  health_check_unhealthy_threshold 5
+  health_check_healthy_threshold 2
+end
+
 coreo_aws_route53_record "${CLUSTER_NAME}" do
   action :sustain
   type "CNAME"
