@@ -132,15 +132,15 @@ def configure_replica_set(replica_host_list, is_master):
     call("echo \"" + command + "&\" >> /etc/rc.local", shell=True)
 
     try:
-        call("sed --in-place '$ i\\" + MONGODB_ULIMIT_VALUE1 + "' " + MONGODB_LIMITS_CONF_FILE)
-        call("sed --in-place '$ i\\" + MONGODB_ULIMIT_VALUE2 + "' " + MONGODB_LIMITS_CONF_FILE)
-        call("sed --in-place '$ i\\" + MONGODB_ULIMIT_VALUE3 + "' " + MONGODB_LIMITS_CONF_FILE)
-        call("sed --in-place '$ i\\" + MONGODB_ULIMIT_VALUE4 + "' " + MONGODB_LIMITS_CONF_FILE)
+        call("echo " + MONGODB_ULIMIT_VALUE1 + " >> " + MONGODB_LIMITS_CONF_FILE)
+        call("echo " + MONGODB_ULIMIT_VALUE2 + " >> " + MONGODB_LIMITS_CONF_FILE)
+        call("echo " + MONGODB_ULIMIT_VALUE3 + " >> " + MONGODB_LIMITS_CONF_FILE)
+        call("echo " + MONGODB_ULIMIT_VALUE4 + " >> " + MONGODB_LIMITS_CONF_FILE)
 
-        call("sed --in-place '$ i\\" + MONGODB_ULIMIT_VALUE1 + "' " + MONGODB_NPROC_CONF_FILE)
-        call("sed --in-place '$ i\\" + MONGODB_ULIMIT_VALUE2 + "' " + MONGODB_NPROC_CONF_FILE)
-        call("sed --in-place '$ i\\" + MONGODB_ULIMIT_VALUE3 + "' " + MONGODB_NPROC_CONF_FILE)
-        call("sed --in-place '$ i\\" + MONGODB_ULIMIT_VALUE4 + "' " + MONGODB_NPROC_CONF_FILE)
+        call("echo " + MONGODB_ULIMIT_VALUE1 + " >> " + MONGODB_NPROC_CONF_FILE)
+        call("echo " + MONGODB_ULIMIT_VALUE2 + " >> " + MONGODB_NPROC_CONF_FILE)
+        call("echo " + MONGODB_ULIMIT_VALUE3 + " >> " + MONGODB_NPROC_CONF_FILE)
+        call("echo " + MONGODB_ULIMIT_VALUE4 + " >> " + MONGODB_NPROC_CONF_FILE)
     except Exception as e:
         print "Exception while updating limits.comf file. " + e.message
 
