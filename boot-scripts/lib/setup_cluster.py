@@ -23,6 +23,12 @@ MONGO_DB_CONFIG_LOG_PATH = "/var/log/mongodb/mongod.log"
 MONGO_DB_CONFIG_FILE_PATH="/etc/mongod.conf"
 CLUSTER_FILE_LOCATION = "/etc/profile.d/cluster.yaml"
 MONGO_DB_CONFIG_SERVER_DATA_PATH = "/data/configdb"
+MONGODB_ULIMIT_VALUE1 = "*      soft    nofile  64000"
+MONGODB_ULIMIT_VALUE2 = "*      hard    nofile  64000"
+MONGODB_ULIMIT_VALUE3 = "*      soft    nproc  32000"
+MONGODB_ULIMIT_VALUE4 = "*      hard    nproc  32000"
+MONGODB_LIMITS_CONF_FILE = "/etc/security/limits.conf"
+MONGODB_NPROC_CONF_FILE = "/etc/security/limits.d/90-nproc.conf"
 
 
 def write_cluster_file(ip_address_dict):
@@ -43,6 +49,14 @@ def read_cluster_file():
     cluster_data = yaml.load_all(stream)
     return cluster_data
 
+def upload_cluster_file_to_s3_bucket():
+    '''
+
+    :return:
+    '''
+    boto
+    S3 = boto.s3.connect_to_region(get_region())
+    S3
 
 def get_machine_data():
     '''
@@ -104,7 +118,7 @@ def setup_cluster():
                     query_routers_host_list = data[len(data) - 1]["router"]
                     config_server_host_list = data[len(data) - 2]["config"]
                     configure_query_routers(query_routers_host_list, config_server_host_list)
-                    add_shard_to_cluster(query_routers_host_list, node_list)
+                    add_shard_to_cluster(query_routers_host_list, data)
                     add_database_and_shard_collections(query_routers_host_list)
                     add_database_user(query_routers_host_list)
                     break
@@ -120,6 +134,7 @@ def configure_replica_set(replica_host_list, is_master):
     replica_name = replica_host_list.items()[0][0]
     call("service mongod stop", shell=True)
     call("mkdir " + MONGO_DATA_DIR + "  -p ", shell=True)
+    print "replica name " + replica_name
     command = MONGOD_INSTALL_LOCATION + " --replSet " + replica_name + " --port " + MONGODB_PORT \
               + " --logpath " + MONGO_DB_CONFIG_LOG_PATH + " --dbpath " + MONGO_DATA_DIR \
               + " --rest < /dev/null > /dev/null 2>&1&  "
@@ -127,8 +142,22 @@ def configure_replica_set(replica_host_list, is_master):
     call("bash /tmp/mongo.sh &", shell=True)
     call("echo \"" + command + "&\" >> /etc/rc.local", shell=True)
 
+    try:
+        call("sed --in-place '$ i\\" + MONGODB_ULIMIT_VALUE1 + "' " + MONGODB_LIMITS_CONF_FILE)
+        call("sed --in-place '$ i\\" + MONGODB_ULIMIT_VALUE2 + "' " + MONGODB_LIMITS_CONF_FILE)
+        call("sed --in-place '$ i\\" + MONGODB_ULIMIT_VALUE3 + "' " + MONGODB_LIMITS_CONF_FILE)
+        call("sed --in-place '$ i\\" + MONGODB_ULIMIT_VALUE4 + "' " + MONGODB_LIMITS_CONF_FILE)
+
+        call("sed --in-place '$ i\\" + MONGODB_ULIMIT_VALUE1 + "' " + MONGODB_NPROC_CONF_FILE)
+        call("sed --in-place '$ i\\" + MONGODB_ULIMIT_VALUE2 + "' " + MONGODB_NPROC_CONF_FILE)
+        call("sed --in-place '$ i\\" + MONGODB_ULIMIT_VALUE3 + "' " + MONGODB_NPROC_CONF_FILE)
+        call("sed --in-place '$ i\\" + MONGODB_ULIMIT_VALUE4 + "' " + MONGODB_NPROC_CONF_FILE)
+    except Exception as e:
+        print "Exception while updating limits.comf file. " + e.message
+
     # if this is a master instance update node configuration
     if is_master:
+        print "Master node configuration started."
         connection = pymongo.MongoClient()
         members_list = []
         for index, replica_ips in enumerate(replica_host_list.items()[0][1]):
@@ -154,7 +183,7 @@ def configure_replica_set(replica_host_list, is_master):
                 print "retrying mongo db configuration."
                 if retry == max_try:
                     print "Failed to configure replica set."
-	
+
         add_collection()
         add_database_user()
     print "Configure replica set of MongoDB completed..."
@@ -203,22 +232,23 @@ def configure_query_routers(config_server_host_list):
         print "Exception while configuring query routers. " + e.message
 
 
-def add_shard_to_cluster(query_routers_host_list, node_list):
+def add_shard_to_cluster(query_routers_host_list, data):
     '''
     add shards to cluster
     :return:
     '''
     try:
         print "Add shard to cluster started."
-        query_router_host = query_routers_host_list[0]["private_ip"]
+        query_router_host = query_routers_host_list.items()[0][1]["private_ip"]
         call("service mongod stop", shell=True)
-        for replica_ips in node_list[1][0]:
-            if replica_ips["node_type"] == "primary":
-                print "=======" + replica_ips[0] + "========="
-                # Here we need to specify replicaset name and host name to add shard
-                call(MONGO_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT +
-                     "/admin --eval 'db.runCommand( {addShard : \"" + replica_ips[0] + "/" + replica_ips["private_ip"]
-                     + ":" + MONGODB_PORT + "\"})'")
+        for node_list in data:
+            replica_name = node_list.items()[0][0]
+            for replica_ips in node_list.items()[0][1]:
+                if replica_ips["node_type"] == "primary":
+                    # Here we need to specify replicaset name and host name to add shard
+                    call(MONGO_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT +
+                         "/admin --eval 'db.runCommand( {addShard : \"" + replica_name + "/" + replica_ips["private_ip"]
+                         + ":" + MONGODB_PORT + "\"})'")
         print "Add shard to cluster completed."
     except Exception as e:
         print "Exception while adding shard to cluster. " + e.message
@@ -231,7 +261,7 @@ def add_database_and_shard_collections(query_routers_host_list):
     '''
     try:
         print "Add database and shard collection started."
-        query_router_host = query_routers_host_list[0]["private_ip"]
+        query_router_host = query_routers_host_list.items()[0][1]["private_ip"]
         call("service mongod stop", shell=True)
         call(MONGO_INSTALL_LOCATION + query_router_host + ":" + QUERY_ROUTER_PORT
              + "/admin --eval 'printjson(db.runCommand( { enableSharding: \"" + os.environ.get("DATABASE_NAME") + "\" }))'", shell=True)
