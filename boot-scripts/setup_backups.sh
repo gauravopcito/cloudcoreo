@@ -26,7 +26,7 @@ backup_dump_dir="/opt/backups"
 
 private_ip_address="${PRIVATE_IP_ADDRESS}"
 #instance_ids="${INSTANCE_IDS}"
-NAMESERVERS=("${private_ip_address}" "${private_ip_address}")
+NAMESERVERS=("${private_ip_address}")
  
 # get length of an array
 tLen="${#NAMESERVERS[@]}"
