@@ -61,7 +61,7 @@ mongorestore ${backup_dump_dir}
 /etc/init.d/mongod start
 EOF
 
-S3_PREFIX="${MY_REGION}/mongo/${ENV}/${MONGO_NAME}"
+S3_PREFIX="${MY_REGION}/mongo/${ENV}/${CLUSTER_NAME}"
 ## now we need to perform the restore
 (
     cd /opt/; 
