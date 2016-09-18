@@ -136,15 +136,15 @@ def configure_replica_set(replica_host_list, is_master):
     call("echo \"" + command + "&\" >> /etc/rc.local", shell=True)
 
     try:
-        call("echo " + MONGODB_ULIMIT_VALUE1 + " >> " + MONGODB_LIMITS_CONF_FILE)
-        call("echo " + MONGODB_ULIMIT_VALUE2 + " >> " + MONGODB_LIMITS_CONF_FILE)
-        call("echo " + MONGODB_ULIMIT_VALUE3 + " >> " + MONGODB_LIMITS_CONF_FILE)
-        call("echo " + MONGODB_ULIMIT_VALUE4 + " >> " + MONGODB_LIMITS_CONF_FILE)
+        call("echo " + MONGODB_ULIMIT_VALUE1 + " >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
+        call("echo " + MONGODB_ULIMIT_VALUE2 + " >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
+        call("echo " + MONGODB_ULIMIT_VALUE3 + " >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
+        call("echo " + MONGODB_ULIMIT_VALUE4 + " >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
 
-        call("echo " + MONGODB_ULIMIT_VALUE1 + " >> " + MONGODB_NPROC_CONF_FILE)
-        call("echo " + MONGODB_ULIMIT_VALUE2 + " >> " + MONGODB_NPROC_CONF_FILE)
-        call("echo " + MONGODB_ULIMIT_VALUE3 + " >> " + MONGODB_NPROC_CONF_FILE)
-        call("echo " + MONGODB_ULIMIT_VALUE4 + " >> " + MONGODB_NPROC_CONF_FILE)
+        call("echo " + MONGODB_ULIMIT_VALUE1 + " >> " + MONGODB_NPROC_CONF_FILE, shell=True)
+        call("echo " + MONGODB_ULIMIT_VALUE2 + " >> " + MONGODB_NPROC_CONF_FILE, shell=True)
+        call("echo " + MONGODB_ULIMIT_VALUE3 + " >> " + MONGODB_NPROC_CONF_FILE, shell=True)
+        call("echo " + MONGODB_ULIMIT_VALUE4 + " >> " + MONGODB_NPROC_CONF_FILE, shell=True)
     except Exception as e:
         print "Exception while updating limits.comf file. " + e.message
 
@@ -243,7 +243,7 @@ def add_shard_to_cluster(query_routers_host_list, data):
                         # Here we need to specify replicaset name and host name to add shard
                         call(MONGO_INSTALL_LOCATION + " " + query_router_host + ":" + MONGODB_PORT +
                              "/admin --eval 'db.runCommand( {addShard : \"" + replica_name + "/" + host["private_ip"]
-                             + ":" + MONGODB_PORT + "\"})'")
+                             + ":" + MONGODB_PORT + "\"})'", shell=True)
         print "Add shard to cluster completed."
     except Exception as e:
         print "Exception while adding shard to cluster. " + e.message
