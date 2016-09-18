@@ -42,7 +42,7 @@ script_dir="/var/tmp/cloudcoreo-directory-backup-scripts"
 mkdir -p "$script_dir"
 cat <<EOF > "${script_dir}/pre-backup.sh"
 #!/bin/bash
-mongodump --out ${backup_dump_dir}
+sudo mongodump --out ${backup_dump_dir}
 exit 0
 EOF
 cat <<EOF > "${script_dir}/post-backup.sh"
@@ -52,13 +52,13 @@ exit 0
 EOF
 cat <<EOF > "${script_dir}/pre-restore.sh"
 #!/bin/bash
-/etc/init.d/mongod stop
+sudo /etc/init.d/mongod stop
 EOF
 cat <<EOF > "${script_dir}/post-restore.sh"
 #!/bin/bash
 set -eux
 mongorestore ${backup_dump_dir}
-/etc/init.d/mongod start
+sudo /etc/init.d/mongod start
 EOF
 
 S3_PREFIX="${MY_REGION}/mongo/${ENV}/${CLUSTER_NAME}"
