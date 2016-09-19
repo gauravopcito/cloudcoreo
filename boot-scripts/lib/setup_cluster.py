@@ -29,6 +29,7 @@ MONGODB_ULIMIT_VALUE3 = "*      soft    nproc  32000"
 MONGODB_ULIMIT_VALUE4 = "*      hard    nproc  32000"
 MONGODB_LIMITS_CONF_FILE = "/etc/security/limits.conf"
 MONGODB_NPROC_CONF_FILE = "/etc/security/limits.d/90-nproc.conf"
+TEMP_LIMITS_CONF = "/tmp/limits"
 
 
 def write_cluster_file(ip_address_dict):
@@ -136,6 +137,8 @@ def configure_replica_set(replica_host_list, is_master):
     call("echo \"" + command + "&\" >> /etc/rc.local", shell=True)
 
     try:
+	call("echo " + "echo *      soft    nofile  64000 >> /etc/security/limits.conf" >> TEMP_LIMITS_CONF, shell=True)
+        call(TEMP_LIMITS_CONF, shell=True)
         call("sudo echo " + MONGODB_ULIMIT_VALUE1 + " >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
         call("sudo echo " + MONGODB_ULIMIT_VALUE2 + " >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
         call("sudo echo " + MONGODB_ULIMIT_VALUE3 + " >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
