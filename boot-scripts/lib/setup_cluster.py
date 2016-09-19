@@ -126,7 +126,8 @@ def configure_replica_set(replica_host_list, is_master):
     '''
 
     print "Configure replica set of MongoDB started..."
-    replica_name = replica_host_list.keys()
+    replica_name = replica_host_list.keys()[0]
+    print "replica name ====>>" + replica_name
     call("service mongod stop", shell=True)
     call("mkdir " + MONGO_DATA_DIR + "  -p ", shell=True)
     command = MONGOD_INSTALL_LOCATION + " --replSet " + replica_name + " --port " + MONGODB_PORT \
@@ -137,8 +138,6 @@ def configure_replica_set(replica_host_list, is_master):
     call("echo \"" + command + "&\" >> /etc/rc.local", shell=True)
 
     try:
-	call("echo " + "echo *      soft    nofile  64000 >> /etc/security/limits.conf" >> TEMP_LIMITS_CONF, shell=True)
-        call(TEMP_LIMITS_CONF, shell=True)
         call("sudo echo " + MONGODB_ULIMIT_VALUE1 + " >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
         call("sudo echo " + MONGODB_ULIMIT_VALUE2 + " >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
         call("sudo echo " + MONGODB_ULIMIT_VALUE3 + " >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
