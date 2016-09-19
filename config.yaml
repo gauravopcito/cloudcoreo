@@ -116,36 +116,6 @@ variables:
         overrides: null
         required: true
         type: null
-    MONGO_SG_NAME:
-        default: op-mongodb
-        required: true
-        description: the name of the mongodb security group to create
-    MONGO_INGRESS_CIDRS:
-        default:
-            - 10.0.0.0/8
-        description: cidrs to allow outgoing connections to
-        required: true
-        type: Array
-    MONGO_EGRESS_CIDRS:
-        default:
-            - 0.0.0.0/0
-        description: cidrs to allow outgoing connections to
-        required: true
-        type: Array
-    MONGO_SIZE:
-        default: t2.micro
-        description: null
-        required: true
-    MONGO_GROUP_SIZE_MIN:
-        required: true
-        description: the miniumum number of mongo instances to launch
-        default: 2
-        type: number
-    MONGO_GROUP_SIZE_MAX:
-        required: true
-        description: the maximum number of mongo instances to launch
-        default: 2
-        type: number
     MONGO_BACKUP_CRON:
         default: "0 * * * *"
         description: the cron schedule for backups
@@ -219,25 +189,6 @@ variables:
         description: "If you have a datadog key, enter it here and we will install the agent"
         overrides: null
         required: false
-    MONGO_AMI:
-        description: the ami id of the mongo db server
-        switch: "INSTANCE::region"
-        cases:
-            us-east-1: ami-1ecae776
-            us-west-1: ami-d114f295
-            us-west-2: ami-e7527ed7
-            eu-west-1: ami-a10897d6
-            eu-central-1: ami-a8221fb5
-            ap-southeast-1: ami-68d8e93a
-            ap-northeast-1: ami-cbf90ecb
-            ap-southeast-2: ami-fd9cecc7
-            sa-east-1: ami-b52890a8
-        type: case
-    MONGO_KEY:
-        default: mongodbcluster
-        description: the key pair to launch the mongo db with - this should exist in the clou already
-        required: false
-        type: string
     WAIT_FOR_CLUSTER_MIN:
         default: true
         description: true if the cluster should wait for all instances to be in a running state
