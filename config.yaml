@@ -100,7 +100,7 @@ variables:
         type: number
         required: true
     CLUSTER_HEALTH_CHECK_GRACE_PERIOD:
-        default: 1000
+        default: 10000
         description: the time in seconds to allow for instance to boot before checking health
         type: number
         required: true
