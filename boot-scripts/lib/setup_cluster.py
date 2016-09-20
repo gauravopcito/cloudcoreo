@@ -141,7 +141,7 @@ def configure_replica_set(replica_host_list, is_master):
     #    call("echo '" + MONGODB_ULIMIT_VALUE1 + "' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
     #    call("echo '" + MONGODB_ULIMIT_VALUE2 + "' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
     #    call("echo '" + MONGODB_ULIMIT_VALUE3 + "' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
-    #    call("echo '" + MONGODB_ULIMIT_VALUE4 + "' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)#
+    #    call("echo '" + MONGODB_ULIMIT_VALUE4 + "' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
 
     #    call("echo '" + MONGODB_ULIMIT_VALUE1 + "' >> " + MONGODB_NPROC_CONF_FILE, shell=True)
     #    call("echo '" + MONGODB_ULIMIT_VALUE2 + "' >> " + MONGODB_NPROC_CONF_FILE, shell=True)
