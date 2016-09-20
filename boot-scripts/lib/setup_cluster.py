@@ -125,7 +125,9 @@ def configure_replica_set(replica_host_list, is_master):
     '''
 
     print "Configure replica set of MongoDB started..."
+    print is_master
     replica_name = replica_host_list.keys()[0]
+    print "replica name =====>>" + replica_name
     call("service mongod stop", shell=True)
     call("mkdir " + MONGO_DATA_DIR + "  -p ", shell=True)
     command = MONGOD_INSTALL_LOCATION + " --replSet " + replica_name + " --port " + MONGODB_PORT \
@@ -149,7 +151,6 @@ def configure_replica_set(replica_host_list, is_master):
         print "Exception while updating limits.comf file. " + e.message
 
     # if this is a master instance update node configuration
-    print "is master=====>>" + is_master
     if is_master:
         print "Master node configuration started."
         connection = pymongo.MongoClient()
