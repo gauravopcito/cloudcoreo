@@ -28,7 +28,6 @@ MONGODB_ULIMIT_VALUE2 = "*      hard    nofile  64000"
 MONGODB_ULIMIT_VALUE3 = "*      soft    nproc  32000"
 MONGODB_ULIMIT_VALUE4 = "*      hard    nproc  32000"
 MONGODB_LIMITS_CONF_FILE = "/etc/security/limits.conf"
-MONGODB_NPROC_CONF_FILE = "/etc/security/limits.d/90-nproc.conf"
 
 
 def write_cluster_file(ip_address_dict):
@@ -137,18 +136,13 @@ def configure_replica_set(replica_host_list, is_master):
     call("bash /tmp/mongo.sh &", shell=True)
     call("echo \"" + command + "&\" >> /etc/rc.local", shell=True)
 
-    #try:
-    #    call("echo '" + MONGODB_ULIMIT_VALUE1 + "' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
-    #    call("echo '" + MONGODB_ULIMIT_VALUE2 + "' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
-    #    call("echo '" + MONGODB_ULIMIT_VALUE3 + "' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
-    #    call("echo '" + MONGODB_ULIMIT_VALUE4 + "' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
-
-    #    call("echo '" + MONGODB_ULIMIT_VALUE1 + "' >> " + MONGODB_NPROC_CONF_FILE, shell=True)
-    #    call("echo '" + MONGODB_ULIMIT_VALUE2 + "' >> " + MONGODB_NPROC_CONF_FILE, shell=True)
-    #    call("echo '" + MONGODB_ULIMIT_VALUE3 + "' >> " + MONGODB_NPROC_CONF_FILE, shell=True)
-    #    call("echo '" + MONGODB_ULIMIT_VALUE4 + "' >> " + MONGODB_NPROC_CONF_FILE, shell=True)
-    #except Exception as e:
-     #   print "Exception while updating limits.comf file. " + e.message
+    try:
+        call("echo '" + MONGODB_ULIMIT_VALUE1 + "' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
+        call("echo '" + MONGODB_ULIMIT_VALUE2 + "' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
+        call("echo '" + MONGODB_ULIMIT_VALUE3 + "' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
+        call("echo '" + MONGODB_ULIMIT_VALUE4 + "' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
+    except Exception as e:
+        print "Exception while updating limits.comf file. " + e.message
 
     # if this is a master instance update node configuration
     if is_master:
