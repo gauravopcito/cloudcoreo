@@ -149,6 +149,7 @@ def configure_replica_set(replica_host_list, is_master):
         print "Exception while updating limits.comf file. " + e.message
 
     # if this is a master instance update node configuration
+    print "is master=====>>" + is_master
     if is_master:
         print "Master node configuration started."
         connection = pymongo.MongoClient()
