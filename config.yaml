@@ -60,7 +60,7 @@ variables:
         description: the zone in which the internal elb dns entry should be maintained
         type: String
         required: true
-        default: hack.cloudcoreo.com
+        default: cloudcoreo.opcito.com
     CLUSTER_INSTANCE_TRAFFIC_PORTS:
         default:
             - 22
@@ -78,7 +78,7 @@ variables:
         type: Array
         required: true
     BACKUP_BUCKET:
-        default: cloudcoreo-opcito-bucket
+        default: cloudcoreo-opcito-buk
         description: what s3 bucket should we back up to?
         required: true
     MONGO_NAME:
@@ -154,7 +154,7 @@ variables:
         default: "[\n  {\n    :elb_protocol => 'http', \n    :elb_port => 80,\n    :to_protocol => 'https', \n    :to_port => 8443\n  }\n]\n"
         description: The listeners to apply to the ELB
     BACKUP_BUCKET_REGION:
-        default: us-east-1
+        default: us-west-2
         description: the region where there vpn backups bucket was created
         overrides: null
         required: false
@@ -162,7 +162,7 @@ variables:
         description: the ssh key to associate with the instance(s) - blank will disable ssh
         type: string
         required: false
-        default: george
+        default: mongodbcluster
     DATABASE_NAME:
         default: cloudcoreodb
         description: Database name to create
