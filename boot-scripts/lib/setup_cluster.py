@@ -124,6 +124,7 @@ def configure_replica_set(replica_host_list, is_master, machine_ip):
     '''
     print "Configure replica set of MongoDB started..."
     replica_name = replica_host_list.keys()[0]
+    print replica_name
     call("service mongod stop", shell=True)
     call("mkdir " + MONGO_DATA_DIR + "  -p ", shell=True)
     command = MONGOD_INSTALL_LOCATION + " --replSet " + replica_name + " --port " + MONGODB_PORT \
@@ -152,6 +153,7 @@ def configure_replica_set(replica_host_list, is_master, machine_ip):
             for host in replica_ips:
                 members_list.append({'_id': index, 'host': host["private_ip"] + ":" + MONGODB_PORT})
         conf = {'_id': replica_name, 'members': members_list}
+        print conf
         db = connection.get_database("admin")
 
         retry = 1
