@@ -124,9 +124,7 @@ def configure_replica_set(replica_host_list, is_master):
     '''
 
     print "Configure replica set of MongoDB started..."
-    print is_master
     replica_name = replica_host_list.keys()[0]
-    print "replica name =====>>" + replica_name
     call("service mongod stop", shell=True)
     call("mkdir " + MONGO_DATA_DIR + "  -p ", shell=True)
     command = MONGOD_INSTALL_LOCATION + " --replSet " + replica_name + " --port " + MONGODB_PORT \
@@ -176,7 +174,7 @@ def configure_replica_set(replica_host_list, is_master):
 
         add_collection()
         add_database_user()
-    print "Configure replica set of MongoDB completed..."
+    print "Configure replica set of MongoDB completed."
 
 
 def configure_config_server():
