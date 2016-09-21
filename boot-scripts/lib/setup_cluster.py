@@ -100,7 +100,7 @@ def setup_cluster():
                     print "in first if condition."
                     if node_type == "primary" or node_type == "secondary":
                         print "in second if condition."
-                        configure_replica_set(node_list, is_master)
+                        configure_replica_set(node_list, is_master, machine_ip)
                         break
                     elif node_type == "config":
                         print "in first elif condition."
@@ -117,7 +117,7 @@ def setup_cluster():
                         break
 
 
-def configure_replica_set(replica_host_list, is_master):
+def configure_replica_set(replica_host_list, is_master, machine_ip):
     '''
     Configures the replica set
     :return:
@@ -174,8 +174,8 @@ def configure_replica_set(replica_host_list, is_master):
                 if retry == max_try:
                     print "Failed to configure replica set."
 
-        add_collection()
-        add_database_user()
+        add_collection(machine_ip)
+        add_database_user(machine_ip)
     print "Configure replica set of MongoDB completed."
 
 
@@ -285,28 +285,28 @@ def add_database_and_shard_collections(query_routers_host_list):
         print "Exception while enabling database and sharding collections. " + e.message
 
 
-def add_collection(node_list):
+def add_collection(machine_ip):
     '''
     add collection
     :return:
     '''
     try:
          print "Add collection started..."
-         call("/usr/bin/mongo " + node_list[1][0]["private_ip"] + ":" + MONGODB_PORT + "/" + os.environ.get("DATABASE_NAME")
+         call("/usr/bin/mongo " + machine_ip + ":" + MONGODB_PORT + "/" + os.environ.get("DATABASE_NAME")
               + " --eval 'printjson(db.createCollection(\"" - + os.environ.get("COLLECTION_NAME") + "\"))'", shell=True)
          print "Add collection completed successfully."
     except Exception as e:
         print "Exception while adding collection. " + e.message
 
 
-def add_database_user(node_list):
+def add_database_user(machine_ip):
     '''
     add database user
     :return:
     '''
     try:
         print "Add database user started..."
-        call("/usr/bin/mongo " + node_list[1][0]["private_ip"] + ":" + MONGODB_PORT + "/" + os.environ.get("DATABASE_NAME")
+        call("/usr/bin/mongo " + machine_ip + ":" + MONGODB_PORT + "/" + os.environ.get("DATABASE_NAME")
              + " --eval 'printjson(db.createUser( { user: \"" - + os.environ.get("MASTER_USER") + "\", pwd: \"" +
              os.environ.get("MASTER_PASSWORD") + "\", roles: [ \"readWrite\" ] } ))'", shell=True)
         print "Add database user completed successfully."
