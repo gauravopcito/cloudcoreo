@@ -122,7 +122,6 @@ def configure_replica_set(replica_host_list, is_master, machine_ip):
     Configures the replica set
     :return:
     '''
-
     print "Configure replica set of MongoDB started..."
     replica_name = replica_host_list.keys()[0]
     call("service mongod stop", shell=True)
