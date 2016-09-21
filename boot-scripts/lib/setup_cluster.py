@@ -135,10 +135,12 @@ def configure_replica_set(replica_host_list, is_master):
     call("echo \"" + command + "&\" >> /etc/rc.local", shell=True)
 
     try:
+	call("sed -i '$ d' " + MONGODB_LIMITS_CONF_FILE)
         call("echo '" + MONGODB_ULIMIT_VALUE1 + "' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
         call("echo '" + MONGODB_ULIMIT_VALUE2 + "' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
         call("echo '" + MONGODB_ULIMIT_VALUE3 + "' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
         call("echo '" + MONGODB_ULIMIT_VALUE4 + "' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
+	call("echo '# End of file' >> " + MONGODB_LIMITS_CONF_FILE, shell=True)
     except Exception as e:
         print "Exception while updating limits.comf file. " + e.message
 
@@ -183,13 +185,14 @@ def configure_config_server():
     :return:
     '''
     try:
-        print "Config server configuration started."
+        print "Config server configuration started..."
         call("service mongod stop", shell=True)
         call("mkdir " + CONFIG_SERVER_DATA_DIR + "  -p ", shell=True)
         command = MONGOD_INSTALL_LOCATION + " --configsvr --dbpath " + MONGO_DB_CONFIG_SERVER_DATA_PATH + " --logpath " + \
                   MONGO_DB_CONFIG_LOG_PATH + " --port " + CONFIG_SERVER_PORT + " < /dev/null > /dev/null 2>&1&"
         call("echo \"" + command + "\" > /tmp/mongo.sh", shell=True)
         call("bash /tmp/mongo.sh &", shell=True)
+	print "Config server configuration completed."
     except Exception as e:
         print "Exception while configuring config server. " + e.message
 
