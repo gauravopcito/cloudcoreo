@@ -42,6 +42,7 @@ script_dir="/var/tmp/cloudcoreo-directory-backup-scripts"
 mkdir -p "$script_dir"
 cat <<EOF > "${script_dir}/pre-backup.sh"
 #!/bin/bash
+mkdir ${backup_dump_dir}
 mongodump --out ${backup_dump_dir}
 exit 0
 EOF
