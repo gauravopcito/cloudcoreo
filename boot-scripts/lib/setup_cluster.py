@@ -294,7 +294,7 @@ def add_collection(machine_ip):
     try:
          print "Add collection started..."
          call("/usr/bin/mongo " + machine_ip + ":" + MONGODB_PORT + "/" + os.environ.get("DATABASE_NAME")
-              + " --eval 'printjson(db.createCollection(\"" - + os.environ.get("COLLECTION_NAME") + "\"))'", shell=True)
+              + " --eval 'printjson(db.createCollection(\"" + os.environ.get("COLLECTION_NAME") + "\"))'", shell=True)
          print "Add collection completed successfully."
     except Exception as e:
         print "Exception while adding collection. " + e.message
@@ -308,7 +308,7 @@ def add_database_user(machine_ip):
     try:
         print "Add database user started..."
         call("/usr/bin/mongo " + machine_ip + ":" + MONGODB_PORT + "/" + os.environ.get("DATABASE_NAME")
-             + " --eval 'printjson(db.createUser( { user: \"" - + os.environ.get("MASTER_USER") + "\", pwd: \"" +
+             + " --eval 'printjson(db.createUser( { user: \"" + os.environ.get("MASTER_USER") + "\", pwd: \"" +
              os.environ.get("MASTER_PASSWORD") + "\", roles: [ \"readWrite\" ] } ))'", shell=True)
         print "Add database user completed successfully."
     except Exception as e:
