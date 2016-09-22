@@ -139,17 +139,17 @@ coreo_aws_s3_bucket "${BACKUP_BUCKET}" do
    region "${BACKUP_BUCKET_REGION}"
 end
 
-coreo_aws_iam_policy "${MONGO_NAME}-backup" do
+coreo_aws_iam_policy "${CLUSTER_NAME}-backup" do
   action :sustain
-  policy_name "Allow${MONGO_NAME}S3Backup"
+  policy_name "Allow${CLUSTER_NAME}S3Backup"
   policy_document <<-EOH
 {
   "Statement": [
     {
       "Effect": "Allow",
       "Resource": [
-          "arn:aws:s3:::${BACKUP_BUCKET}/${REGION}/mongo/${ENV}/${MONGO_NAME}",
-          "arn:aws:s3:::${BACKUP_BUCKET}/${REGION}/mongo/${ENV}/${MONGO_NAME}/*"
+          "arn:aws:s3:::${BACKUP_BUCKET}/${REGION}/mongo/${ENV}/${CLUSTER_NAME}",
+          "arn:aws:s3:::${BACKUP_BUCKET}/${REGION}/mongo/${ENV}/${CLUSTER_NAME}/*"
       ],
       "Action": [ 
           "s3:*"
@@ -171,32 +171,6 @@ coreo_aws_iam_policy "${MONGO_NAME}-backup" do
       "Action": [
           "s3:GetBucket*", 
           "s3:List*" 
-      ]
-    }
-  ]
-}
-EOH
-end
-
-coreo_aws_iam_policy "${CLUSTER_NAME}" do
-  action :sustain
-  policy_name "${CLUSTER_NAME}ServerIAMPolicy"
-  policy_document <<-EOH
-{
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Resource": [
-          "*"
-      ],
-      "Action": [ 
-          "autoscaling:DescribeAutoScalingGroups",
-          "autoscaling:DescribeAutoScalingInstances",
-          "ec2:DescribeAvailabilityZones",
-          "ec2:DescribeInstanceAttribute",
-          "ec2:DescribeInstanceStatus",
-          "ec2:DescribeInstances",
-          "ec2:DescribeTags"
       ]
     }
   ]

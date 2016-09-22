@@ -81,10 +81,6 @@ variables:
         default: cloudcoreo-opcito-buk
         description: what s3 bucket should we back up to?
         required: true
-    MONGO_NAME:
-        default: op-mongodb
-        description: name this mongodb deployment
-        required: true
     CLUSTER_SIZE:
         default: t2.small
         description: the image size to launch
@@ -108,6 +104,10 @@ variables:
         default: 300
         description: the time in seconds between rolling instances during an upgrade
         type: number
+        required: true
+    MONGO_NAME:
+        default: op-mongodb
+        description: name this mongodb deployment
         required: true
     TIMEZONE:
         default: America/Chicago

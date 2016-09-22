@@ -70,4 +70,4 @@ S3_PREFIX="${MY_REGION}/mongo/${ENV}/${CLUSTER_NAME}"
 )
 
 ## now that we are restored, lets set up the backups
-echo "${backup_cron} ps -fwwC python | grep -q cloudcoreo-directory-backup || { cd /opt/; mkdir -p ${backup_dump_dir}; nohup python cloudcoreo-directory-backup.py --s3-backup-region ${backup_bucket_region} --s3-backup-bucket ${BACKUP_BUCKET} --s3-prefix $S3_PREFIX --directory ${backup_dump_dir} --dump-dir /tmp --pre-backup-script ${script_dir}pre-backup.sh --post-backup-script ${script_dir}/post-backup.sh & }" 
+${backup_cron} ps -fwwC python | grep -q cloudcoreo-directory-backup || { cd /opt/; mkdir -p ${backup_dump_dir}; nohup python cloudcoreo-directory-backup.py --s3-backup-region ${backup_bucket_region} --s3-backup-bucket ${BACKUP_BUCKET} --s3-prefix ${S3_PREFIX} --directory ${backup_dump_dir} --dump-dir /tmp --pre-backup-script ${script_dir}/pre-backup.sh --post-backup-script ${script_dir}/post-backup.sh & } 
