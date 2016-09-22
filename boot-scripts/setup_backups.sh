@@ -22,7 +22,7 @@ MY_AZ="$(curl -sL 169.254.169.254/latest/meta-data/placement/availability-zone)"
 MY_REGION="$(echo ${MY_AZ%?})"
 backup_cron="${MONGO_BACKUP_CRON:-0 * * * *}"
 backup_bucket_region="${BACKUP_BUCKET_REGION:-us-east-1}"
-backup_dump_dir="/opt/backups"
+backup_dump_dir="/data/backups"
 
 private_ip_address="${PRIVATE_IP_ADDRESS}"
 #instance_ids="${INSTANCE_IDS}"
@@ -70,4 +70,4 @@ S3_PREFIX="${MY_REGION}/mongo/${ENV}/${CLUSTER_NAME}"
 )
 
 ## now that we are restored, lets set up the backups
-${backup_cron} ps -fwwC python | grep -q cloudcoreo-directory-backup || { cd /opt/; mkdir -p ${backup_dump_dir}; nohup python cloudcoreo-directory-backup.py --s3-backup-region ${backup_bucket_region} --s3-backup-bucket ${BACKUP_BUCKET} --s3-prefix ${S3_PREFIX} --directory ${backup_dump_dir} --dump-dir /tmp --pre-backup-script ${script_dir}/pre-backup.sh --post-backup-script ${script_dir}/post-backup.sh & } 
+${backup_cron} ps -fwwC python | grep -q cloudcoreo-directory-backup || { cd /data/; mkdir -p backups; nohup python cloudcoreo-directory-backup.py --s3-backup-region ${backup_bucket_region} --s3-backup-bucket ${BACKUP_BUCKET} --s3-prefix ${S3_PREFIX} --directory ${backup_dump_dir} --dump-dir /tmp --pre-backup-script ${script_dir}/pre-backup.sh --post-backup-script ${script_dir}/post-backup.sh & } 
