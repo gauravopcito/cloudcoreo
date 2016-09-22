@@ -178,6 +178,32 @@ coreo_aws_iam_policy "${CLUSTER_NAME}-backup" do
 EOH
 end
 
+coreo_aws_iam_policy "${CLUSTER_NAME}" do
+  action :sustain
+  policy_name "${CLUSTER_NAME}ServerIAMPolicy"
+  policy_document <<-EOH
+{
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Resource": [
+          "*"
+      ],
+      "Action": [ 
+          "autoscaling:DescribeAutoScalingGroups",
+          "autoscaling:DescribeAutoScalingInstances",
+          "ec2:DescribeAvailabilityZones",
+          "ec2:DescribeInstanceAttribute",
+          "ec2:DescribeInstanceStatus",
+          "ec2:DescribeInstances",
+          "ec2:DescribeTags"
+      ]
+    }
+  ]
+}
+EOH
+end
+
 coreo_aws_iam_instance_profile "${CLUSTER_NAME}" do
   action :sustain
   policies ["${CLUSTER_NAME}"]
