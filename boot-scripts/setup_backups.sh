@@ -58,7 +58,7 @@ EOF
 cat <<EOF > "${script_dir}/post-restore.sh"
 #!/bin/bash
 set -eux
-mongorestore ${backup_dump_dir}
+mongorestore --dbpath /data/db --journal ${backup_dump_dir}
 /etc/init.d/mongod start
 EOF
 
