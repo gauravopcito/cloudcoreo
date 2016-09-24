@@ -74,12 +74,13 @@ def get_asg_instances(asg_name):
     return instances
 
 
-def get_asg_activity(asg_name):
-    group = AUTOSCALE.get_all_groups([asg_name])[0]
+def get_asg_activity():
+    group = AUTOSCALE.get_all_groups([my_asg_name])[0]
     activities = group.get_activities()
     activity = activities[-1]
-    print "====== in activity ======="
+    print "====== before activity ======="
     print activity
+    return activity
 
 
 EC2 = boto.ec2.connect_to_region(get_region())

@@ -343,6 +343,11 @@ config_server_list = []
 router_list = []
 nodes_list = []
 instances = instances.split()
+
+print "========>> in setup node data <<=========="
+activity_lst = get_asg_activity()
+print activity_lst
+
 if len(instances) > 1:
     for index, instance in enumerate(instances):
         if index < 3:
