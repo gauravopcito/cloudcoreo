@@ -207,7 +207,7 @@ def configure_query_routers(config_server_host_list):
         print "Query router configuration started."
         call("service mongod stop", shell=True)
         config_server_hostname_string = ""
-        number_of_host = len(config_server_host_list.items()[0][1])
+        number_of_host = len(config_server_host_list.values())
         for index, host_dict in enumerate(config_server_host_list.values()):
             for host in host_dict:
                 if index != number_of_host-1:
