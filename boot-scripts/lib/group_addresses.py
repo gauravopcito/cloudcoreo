@@ -70,7 +70,17 @@ def get_asg_instances(asg_name):
     instance_ids = [i.instance_id for i in group.instances]
     reservations = EC2.get_all_instances(instance_ids)
     instances = [i for r in reservations for i in r.instances]
+    get_asg_activity(asg_name)
     return instances
+
+
+def get_asg_activity(asg_name):
+    group = AUTOSCALE.get_all_groups([asg_name])[0]
+    activities = group.get_activities()
+    activity = activities[-1]
+    print "====== in activity ======="
+    print activity
+
 
 EC2 = boto.ec2.connect_to_region(get_region())
 AUTOSCALE = boto.ec2.autoscale.connect_to_region(get_region())
