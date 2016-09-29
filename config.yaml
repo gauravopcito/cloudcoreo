@@ -154,7 +154,7 @@ variables:
         default: "[\n  {\n    :elb_protocol => 'http', \n    :elb_port => 80,\n    :to_protocol => 'https', \n    :to_port => 8443\n  }\n]\n"
         description: The listeners to apply to the ELB
     BACKUP_BUCKET_REGION:
-        default: us-west-2
+        default: us-east-1
         description: the region where there vpn backups bucket was created
         overrides: null
         required: false
