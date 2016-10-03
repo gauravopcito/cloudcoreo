@@ -70,32 +70,28 @@ def get_asg_instances(asg_name):
     instance_ids = [i.instance_id for i in group.instances]
     reservations = EC2.get_all_instances(instance_ids)
     instances = [i for r in reservations for i in r.instances]
-    get_asg_activity()
     return instances
-
-
-def get_asg_activity():
-    group = AUTOSCALE.get_all_groups([my_asg_name])[0]
-    activities = group.get_activities()
-    activity = activities[-1]
-    print "====== before activity ======="
-    print activity
-    return activity
 
 
 EC2 = boto.ec2.connect_to_region(get_region())
 AUTOSCALE = boto.ec2.autoscale.connect_to_region(get_region())
-
+CLUSTER_GROUP_SIZE_MIN = os.environ.get("CLUSTER_GROUP_SIZE_MIN")
+is_size_equal = False
 my_asg_name = get_myasg_name()
-oldest_instance = None
-if my_asg_name != None:
-    instances = get_asg_instances(my_asg_name)
-    times = []
-    for instance in range(0, len(instances)):
-        times.append({'id':instances[instance].id, 'launch_time':instances[instance].launch_time, 'private_ip_address': instances[instance].private_ip_address })
-    sor = sorted(times, key=lambda k: k['launch_time'])
-    for ins in range(0, len(sor)):
-        if sor[ins]['private_ip_address'] is not None:
-            print sor[ins]['private_ip_address']
-else:
-    print get_me().private_ip_address
+
+while (not is_size_equal):
+    print "in while loop"
+    if my_asg_name != None:
+        instances = get_asg_instances(my_asg_name)
+        if len(instances) == CLUSTER_GROUP_SIZE_MIN:
+            print "in chck instances leangth if condition."
+            is_size_equal = True
+            times = []
+            for instance in range(0, len(instances)):
+                times.append({'id':instances[instance].id, 'launch_time':instances[instance].launch_time, 'private_ip_address': instances[instance].private_ip_address })
+            sor = sorted(times, key=lambda k: k['launch_time'])
+            for ins in range(0, len(sor)):
+                if sor[ins]['private_ip_address'] is not None:
+                    print sor[ins]['private_ip_address']
+    else:
+        print get_me().private_ip_address

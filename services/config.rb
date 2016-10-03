@@ -227,6 +227,7 @@ coreo_aws_ec2_instance "${CLUSTER_NAME}" do
 			 "COLLECTION_NAME=${COLLECTION_NAME}",
 			 "MASTER_USER=${MASTER_USER}",
 			 "MASTER_PASSWORD=${MASTER_PASSWORD}",
+			 "CLUSTER_GROUP_SIZE_MIN=${CLUSTER_GROUP_SIZE_MIN}",
 			 "PRIVATE_IP_ADDRESS=STACK::coreo_aws_ec2_autoscaling.${CLUSTER_NAME}.private_ip_addresses"
                         ]
 end
