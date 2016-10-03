@@ -70,7 +70,7 @@ def get_asg_instances(asg_name):
     instance_ids = [i.instance_id for i in group.instances]
     reservations = EC2.get_all_instances(instance_ids)
     instances = [i for r in reservations for i in r.instances]
-    get_asg_activity(asg_name)
+    get_asg_activity()
     return instances
 
 
