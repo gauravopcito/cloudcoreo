@@ -86,12 +86,12 @@ variables:
         description: the image size to launch
         required: true
     CLUSTER_GROUP_SIZE_MIN:
-        default: 10
+        default: 3
         description: the minimum number of instances to launch
         type: number
         required: true
     CLUSTER_GROUP_SIZE_MAX:
-        default: 12
+        default: 5
         description: the maxmium number of instances to launch
         type: number
         required: true
